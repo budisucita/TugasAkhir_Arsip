@@ -80,7 +80,55 @@ class AnggotaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'aktif' => 'Aktif',
+                        'tidak aktif' => 'Tidak Aktif',
+                    ]),
+
+                Tables\Filters\Filter::make('kontak')
+                    ->form([
+                        Forms\Components\TextInput::make('kontak')
+                            ->label('Kontak')
+                            ->placeholder('Cari berdasarkan nomor kontak'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['kontak'] ?? null),
+                            fn (Builder $q) => $q->where('kontak', 'like', '%' . $data['kontak'] . '%')
+                        )
+                    )
+                    ->indicateUsing(fn (array $data): ?string => filled($data['kontak'] ?? null)
+                        ? 'Kontak: ' . $data['kontak']
+                        : null),
+
+                Tables\Filters\Filter::make('terdaftar')
+                    ->label('Periode Pendaftaran')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Illuminate\Database\Eloquent\Builder;
 
 class TemplateSuratResource extends Resource
 {
@@ -64,7 +65,48 @@ class TemplateSuratResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('nama_dokumen')
+                    ->form([
+                        Forms\Components\TextInput::make('nama_dokumen')
+                            ->label('Nama Dokumen')
+                            ->placeholder('Cari berdasarkan nama dokumen'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['nama_dokumen'] ?? null),
+                            fn (Builder $q) => $q->where('nama_dokumen', 'like', '%' . $data['nama_dokumen'] . '%')
+                        )
+                    )
+                    ->indicateUsing(fn (array $data): ?string => filled($data['nama_dokumen'] ?? null)
+                        ? 'Nama: ' . $data['nama_dokumen']
+                        : null),
+
+                Tables\Filters\Filter::make('periode')
+                    ->label('Periode Unggah')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -94,7 +94,78 @@ class KeuanganResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('jenis_transaksi')
+                    ->label('Jenis Transaksi')
+                    ->options([
+                        'pemasukan' => 'Pemasukan',
+                        'pengeluaran' => 'Pengeluaran',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('kegiatan_id')
+                    ->label('Kegiatan')
+                    ->relationship('kegiatan', 'nama_kegiatan')
+                    ->searchable()
+                    ->preload(),
+
+                Tables\Filters\Filter::make('jumlah')
+                    ->label('Rentang Jumlah')
+                    ->form([
+                        Forms\Components\TextInput::make('jumlah_min')
+                            ->label('Jumlah Minimal')
+                            ->numeric()
+                            ->prefix('Rp'),
+                        Forms\Components\TextInput::make('jumlah_max')
+                            ->label('Jumlah Maksimal')
+                            ->numeric()
+                            ->prefix('Rp'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['jumlah_min'] ?? null),
+                            fn (Builder $q) => $q->where('jumlah', '>=', $data['jumlah_min'])
+                        )
+                        ->when(
+                            filled($data['jumlah_max'] ?? null),
+                            fn (Builder $q) => $q->where('jumlah', '<=', $data['jumlah_max'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['jumlah_min'] ?? null)) {
+                            $indikator[] = 'Min: Rp ' . number_format((float) $data['jumlah_min'], 0, ',', '.');
+                        }
+                        if (filled($data['jumlah_max'] ?? null)) {
+                            $indikator[] = 'Maks: Rp ' . number_format((float) $data['jumlah_max'], 0, ',', '.');
+                        }
+                        return $indikator;
+                    }),
+
+                Tables\Filters\Filter::make('periode')
+                    ->label('Periode Tanggal')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

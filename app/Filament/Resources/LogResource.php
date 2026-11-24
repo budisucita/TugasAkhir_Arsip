@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\KeyValueEntry;
@@ -112,6 +113,34 @@ class LogResource extends Resource
                     ->label('User')
                     ->options(User::all()->pluck('name', 'id'))
                     ->searchable(),
+
+                // 3. Filter berdasarkan rentang tanggal
+                Filter::make('periode')
+                    ->label('Periode Waktu')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('created_at', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(), // Tombol untuk melihat detail (Infolist)

@@ -80,7 +80,55 @@ class SuratResource extends Resource
                     ->limit(50),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Jenis Surat')
+                    ->options([
+                        'masuk' => 'Surat Masuk',
+                        'keluar' => 'Surat Keluar',
+                    ]),
+
+                Tables\Filters\Filter::make('pengirim')
+                    ->form([
+                        Forms\Components\TextInput::make('pengirim')
+                            ->label('Pengirim / Instansi')
+                            ->placeholder('Cari berdasarkan pengirim'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['pengirim'] ?? null),
+                            fn (Builder $q) => $q->where('pengirim', 'like', '%' . $data['pengirim'] . '%')
+                        )
+                    )
+                    ->indicateUsing(fn (array $data): ?string => filled($data['pengirim'] ?? null)
+                        ? 'Pengirim: ' . $data['pengirim']
+                        : null),
+
+                Tables\Filters\Filter::make('periode')
+                    ->label('Periode Tanggal Terima')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal_terima', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal_terima', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

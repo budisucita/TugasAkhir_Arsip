@@ -121,7 +121,57 @@ class KegiatanResource extends Resource
                     ->label('LPJ'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'Direncanakan' => 'Direncanakan',
+                        'Berlangsung' => 'Berlangsung',
+                        'Selesai' => 'Selesai',
+                        'Dibatalkan' => 'Dibatalkan',
+                    ]),
+
+                Tables\Filters\Filter::make('lokasi')
+                    ->form([
+                        Forms\Components\TextInput::make('lokasi')
+                            ->label('Lokasi')
+                            ->placeholder('Cari berdasarkan lokasi'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['lokasi'] ?? null),
+                            fn (Builder $q) => $q->where('lokasi', 'like', '%' . $data['lokasi'] . '%')
+                        )
+                    )
+                    ->indicateUsing(fn (array $data): ?string => filled($data['lokasi'] ?? null)
+                        ? 'Lokasi: ' . $data['lokasi']
+                        : null),
+
+                Tables\Filters\Filter::make('periode')
+                    ->label('Periode Tanggal Mulai')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            filled($data['dari'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal_mulai', '>=', $data['dari'])
+                        )
+                        ->when(
+                            filled($data['sampai'] ?? null),
+                            fn (Builder $q) => $q->whereDate('tanggal_mulai', '<=', $data['sampai'])
+                        )
+                    )
+                    ->indicateUsing(function (array $data): array {
+                        $indikator = [];
+                        if (filled($data['dari'] ?? null)) {
+                            $indikator[] = 'Dari: ' . $data['dari'];
+                        }
+                        if (filled($data['sampai'] ?? null)) {
+                            $indikator[] = 'Sampai: ' . $data['sampai'];
+                        }
+                        return $indikator;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

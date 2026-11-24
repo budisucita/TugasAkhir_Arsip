@@ -64,7 +64,12 @@ class DokumentasiRelationManager extends RelationManager
                     ->limit(50),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('tipe')
+                    ->label('Tipe')
+                    ->options([
+                        'foto' => 'Foto',
+                        'video' => 'Video',
+                    ]),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
