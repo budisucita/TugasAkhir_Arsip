@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('logs', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            $table->string('model')->nullable();
+            $table->unsignedBigInteger('keuangan_id')->nullable()->index();
+            $table->unsignedBigInteger('record_id')->nullable()->index();
+
+            $table->string('action');
+            $table->text('description')->nullable();
+
+            $table->longText('before')->nullable();
+            $table->longText('after')->nullable();
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('logs');
+    }
+};
