@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('kegiatan', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->string('nama_kegiatan', 100);
             $table->enum('status', ['Direncanakan', 'Berlangsung', 'Selesai', 'Dibatalkan'])->default('Direncanakan');
             $table->date('tanggal_mulai');

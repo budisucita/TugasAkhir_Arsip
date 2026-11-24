@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Galeri Arsip - {{ $settings->get('judul_website', 'ST. Dharma Bhakti') }}</title>
+    <title>Galeri Arsip - {{ ($settings ?? collect())->get('judul_website', 'ST. Dharma Bhakti') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,7 +84,7 @@
         <div class="container mx-auto px-6 h-20 flex justify-between items-center relative z-50">
             <div class="flex items-center gap-3">
                 <a href="{{ url('/') }}" class="font-bold text-lg md:text-xl tracking-tight text-white truncate max-w-[200px] md:max-w-none hover:text-amber-400 transition-colors">
-                    {{ $settings->get('judul_website', 'ST. Dharma Bhakti') }}
+                    {{ $settings?->get('judul_website', 'ST. Dharma Bhakti') ?? 'ST. Dharma Bhakti' }}
                 </a>
             </div>
             
@@ -177,21 +177,26 @@
     <!-- Gallery Grid (Masonry-like) -->
     <section class="pb-24 min-h-[50vh]">
         <div class="container mx-auto px-6">
-            @if($dokumentasi->count() > 0)
+            @if(($dokumentasi?->count() ?? 0) > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach($dokumentasi as $doc)
                         <div class="relative group rounded-2xl overflow-hidden glass-card hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300" data-aos="fade-up">
                             <div class="w-full aspect-video relative overflow-hidden rounded-2xl">
-                                <img src="{{ Illuminate\Support\Facades\Storage::url($doc->file_path) }}" 
-                                     alt="{{ $doc->kegiatan->nama_kegiatan ?? 'Dokumentasi' }}" 
+                                @php
+                                    $filePath = $doc->file_path ?? null;
+                                    $imageUrl = $filePath ? Illuminate\Support\Facades\Storage::url($filePath) : 'https://placehold.co/800x600/1e293b/fbbf24?text=Gambar+Tidak+Tersedia';
+                                    $downloadUrl = $filePath ? Illuminate\Support\Facades\Storage::disk('public')->url($filePath) : '#';
+                                @endphp
+                                <img src="{{ $imageUrl }}" 
+                                     alt="{{ $doc->kegiatan?->nama_kegiatan ?? 'Dokumentasi' }}" 
                                      class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                                      onerror="this.onerror=null; this.src='https://placehold.co/800x600/1e293b/fbbf24?text=Gambar+Tidak+Tersedia'">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                                     <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                        <p class="text-white font-medium text-sm line-clamp-2 mb-1">{{ $doc->kegiatan->nama_kegiatan ?? 'Dokumentasi' }}</p>
-                                        <p class="text-gray-400 text-xs">{{ $doc->kegiatan->tanggal_selesai->format('d M Y') }}</p>
+                                        <p class="text-white font-medium text-sm line-clamp-2 mb-1">{{ $doc->kegiatan?->nama_kegiatan ?? 'Dokumentasi' }}</p>
+                                        <p class="text-gray-400 text-xs">{{ $doc->kegiatan?->tanggal_selesai?->format('d M Y') ?? '-' }}</p>
                                     </div>
-                                    <a href="{{ Illuminate\Support\Facades\Storage::disk('public')->url($doc->file_path) }}" 
+                                    <a href="{{ $downloadUrl }}" 
                                        download 
                                        target="_blank"
                                        class="absolute bottom-6 right-6 px-4 py-2 min-h-[44px] rounded-xl bg-white text-black hover:bg-amber-400 transition-colors shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
@@ -209,7 +214,7 @@
 
                 <!-- Pagination -->
                 <div class="mt-16 flex justify-center">
-                    {{ $dokumentasi->appends(['search' => request('search')])->links('pagination::tailwind') }}
+                    {{ $dokumentasi?->appends(['search' => request('search')])->links('pagination::tailwind') }}
                 </div>
             @else
                 <div class="text-center py-20 glass-panel rounded-3xl mx-auto max-w-lg">
@@ -230,7 +235,7 @@
     <footer class="border-t border-white/10 bg-[#0c0a09] py-12">
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-3">
-                <span class="text-gray-400 font-medium">© {{ date('Y') }} {{ $settings->get('judul_website') }}. All rights reserved.</span>
+                <span class="text-gray-400 font-medium">© {{ date('Y') }} {{ $settings?->get('judul_website') ?? 'ST. Dharma Bhakti' }}. All rights reserved.</span>
             </div>
             <div class="flex gap-6 text-gray-500">
                 <a href="#" class="hover:text-amber-400 transition-colors">Privacy</a>

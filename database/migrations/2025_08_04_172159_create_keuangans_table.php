@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('keuangan', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Kegiatan::class)->nullable()->constrained('kegiatan')->nullOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->enum('jenis_transaksi', ['pemasukan', 'pengeluaran']);
             $table->decimal('jumlah', 12, 2);
             $table->text('keterangan')->nullable();

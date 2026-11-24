@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('surat', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->string('no_surat', 100)->unique();
             $table->string('pengirim', 100);
             $table->date('tanggal_terima');

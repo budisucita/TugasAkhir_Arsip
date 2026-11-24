@@ -29,6 +29,12 @@ class PengaturanWebsite extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
+        return static::canAccess();
+    }
+
+    public static function canAccess(): bool
+    {
+        // Hanya admin yang boleh membuka dan berinteraksi dengan halaman pengaturan.
         return Auth::user()?->role === 'admin';
     }
 

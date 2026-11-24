@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('dokumentasi', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Kegiatan::class)->constrained('kegiatan')->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->enum('tipe', ['foto', 'video']);
             $table->string('file_path');
             $table->text('deskripsi')->nullable();
