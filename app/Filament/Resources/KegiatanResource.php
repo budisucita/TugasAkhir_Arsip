@@ -11,8 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
@@ -33,15 +31,13 @@ class KegiatanResource extends Resource
     {
         return $form
             ->schema([
-                // Forms\Components\Select::make('user_id')
-                //     ->relationship('user', 'name')
-                //     ->label('Penanggung Jawab')
-                //     ->default(Auth::id())
-                //     ->required(),
                 Forms\Components\TextInput::make('nama_kegiatan')
                     ->required()
                     ->maxLength(100)
                     ->placeholder('Masukkan nama kegiatan'),
+                Forms\Components\TextInput::make('lokasi')
+                    ->maxLength(150)
+                    ->placeholder('Contoh: Balai Banjar Karya Dharma'),
                 Forms\Components\Select::make('status')
                     ->options([
                         'Direncanakan' => 'Direncanakan',
@@ -62,16 +58,34 @@ class KegiatanResource extends Resource
                     ->directory('kegiatan/proposal')
                     ->visibility('public')
                     ->disk('public')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File Proposal harus berformat PDF.',
+                        'max' => 'Ukuran File Proposal maksimal 10 MB.',
+                    ])
                     ->label('File Proposal'),
                 Forms\Components\FileUpload::make('rab_file')
                     ->directory('kegiatan/rab')
                     ->visibility('public')
                     ->disk('public')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File RAB harus berformat PDF.',
+                        'max' => 'Ukuran File RAB maksimal 10 MB.',
+                    ])
                     ->label('File RAB'),
                 Forms\Components\FileUpload::make('lpj_file')
                     ->directory('kegiatan/lpj')
                     ->visibility('public')
                     ->disk('public')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File LPJ harus berformat PDF.',
+                        'max' => 'Ukuran File LPJ maksimal 10 MB.',
+                    ])
                     ->label('File LPJ'),
             ]);
     }
@@ -82,6 +96,9 @@ class KegiatanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nama_kegiatan')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('lokasi')
+                    ->searchable()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -90,9 +107,6 @@ class KegiatanResource extends Resource
                         'Selesai' => 'success',
                         'Dibatalkan' => 'danger',
                     }),
-                // Tables\Columns\TextColumn::make('user.name')
-                //     ->label('Penanggung Jawab')
-                //     ->sortable(),
                 Tables\Columns\TextColumn::make('tanggal_mulai')
                     ->date()
                     ->sortable(),
@@ -135,8 +149,8 @@ class KegiatanResource extends Resource
                 Infolists\Components\Section::make('Detail Kegiatan')
                     ->schema([
                         Infolists\Components\TextEntry::make('nama_kegiatan'),
-                        // Infolists\Components\TextEntry::make('user.name')
-                        //     ->label('Penanggung Jawab'),
+                        Infolists\Components\TextEntry::make('lokasi')
+                            ->placeholder('—'),
                         Infolists\Components\TextEntry::make('tanggal_mulai')
                             ->date(),
                         Infolists\Components\TextEntry::make('tanggal_selesai')

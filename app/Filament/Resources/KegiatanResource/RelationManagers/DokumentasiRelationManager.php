@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class DokumentasiRelationManager extends RelationManager
@@ -37,6 +35,13 @@ class DokumentasiRelationManager extends RelationManager
                 Forms\Components\FileUpload::make('file_path')
                     ->directory('dokumentasi/file')
                     ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'video/mp4'])
+                    ->maxSize(20480)
+                    ->validationMessages([
+                        'mimetypes' => 'File dokumentasi harus berformat JPG, PNG, atau MP4.',
+                        'max' => 'Ukuran file dokumentasi maksimal 20 MB.',
+                        'required' => 'File dokumentasi wajib diunggah.',
+                    ])
                     ->required()
                     ->label('File'),
                 Forms\Components\Textarea::make('deskripsi')
@@ -68,10 +73,5 @@ class DokumentasiRelationManager extends RelationManager
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ]);
-            // ->bulkActions([
-            //     Tables\Actions\BulkActionGroup::make([
-            //         Tables\Actions\DeleteBulkAction::make(),
-            //     ]),
-            // ]);
     }
 }

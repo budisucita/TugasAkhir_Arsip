@@ -145,6 +145,30 @@ Pastikan Anda sudah menjalankan `php artisan storage:link`. Jika masih bermasala
 
 ---
 
+## 🗄️ Sinkronisasi Penyimpanan (Local ↔ S3)
+
+Aplikasi menyediakan perintah artisan `storage:sync` untuk menyelaraskan berkas antara disk lokal (`public`) dan bucket S3 menggunakan verifikasi checksum MD5. Secara default perintah berjalan sebagai **dry-run** (tidak mengubah apa pun) sehingga aman untuk inspeksi.
+
+```bash
+# Lihat perbedaan saja (dry-run)
+php artisan storage:sync --from=public --to=s3 --checksum
+
+# Terapkan sinkronisasi dua arah
+php artisan storage:sync --from=public --to=s3 --direction=both --checksum --apply
+
+# Tarik berkas dari S3 ke lokal
+php artisan storage:sync --from=s3 --to=public --direction=pull --apply
+```
+
+Opsi penting:
+- `--direction=push|pull|both` — arah sinkronisasi (default `both`).
+- `--conflict=skip|from|to|newest` — penanganan konflik bila path sama namun isi berbeda (default `skip`).
+- `--checksum` — bandingkan checksum MD5, bukan hanya ukuran.
+- `--prune` — hapus berkas berlebih di sisi penerima (gunakan dengan hati-hati).
+- `--apply` — tanpa flag ini perintah hanya menampilkan rencana (dry-run).
+
+---
+
 ## 🌐 Deployment (Production)
 
 Untuk penggunaan di server production:

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LogResource\Pages;
-use App\Filament\Resources\LogResource\RelationManagers;
 use App\Models\Log;
 use App\Models\User;
 use Filament\Forms;
@@ -13,9 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;

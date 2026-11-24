@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TemplateSuratResource\Pages;
-use App\Filament\Resources\TemplateSuratResource\RelationManagers;
 use App\Models\TemplateSurat;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 
 class TemplateSuratResource extends Resource
@@ -47,6 +44,11 @@ class TemplateSuratResource extends Resource
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     ])
                     ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File Template harus berformat PDF, DOC, atau DOCX.',
+                        'max' => 'Ukuran File Template maksimal 10 MB.',
+                        'required' => 'File Template wajib diunggah.',
+                    ])
                     ->required(),
             ]);
      } 
@@ -55,19 +57,6 @@ class TemplateSuratResource extends Resource
     {
         return $table
             ->columns([
-                // Tables\Columns\TextColumn::make('nama_dokumen')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('file_path')
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('created_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                // Tables\Columns\TextColumn::make('updated_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-
                 Tables\Columns\TextColumn::make('nama_dokumen')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

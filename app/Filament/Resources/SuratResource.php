@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SuratResource\Pages;
-use App\Filament\Resources\SuratResource\RelationManagers;
 use App\Models\Surat;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,8 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
@@ -55,12 +52,14 @@ class SuratResource extends Resource
                     ->required()
                     ->directory('surat/file')
                     ->visibility('public')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File Surat harus berformat PDF.',
+                        'max' => 'Ukuran File Surat maksimal 10 MB.',
+                        'required' => 'File Surat wajib diunggah.',
+                    ])
                     ->label('File Surat (PDF)'),
-                // Forms\Components\Select::make('user_id')
-                //     ->relationship('user', 'name')
-                //     ->label('Diinput oleh')
-                //     ->default(Auth::id())
-                //     ->required(),
             ]);
     }
 

@@ -8,7 +8,6 @@
         "php": "^8.2",
         "ext-intl": "*",
         "ext-zip": "*",
-        "bezhansalleh/filament-shield": "^3.9",
         "filament/filament": "^3.2",
         "jeffgreco13/filament-breezy": "^2.6",
         "laravel/framework": "^11.0",

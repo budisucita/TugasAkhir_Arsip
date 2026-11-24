@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Kegiatan;
-use App\Models\User;
-use App\Models\Log;
-
-
 
 class Keuangan extends Model
 {

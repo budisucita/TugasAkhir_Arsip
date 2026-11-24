@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KeuanganResource\Pages;
-use App\Filament\Resources\KeuanganResource\RelationManagers;
 use App\Models\Keuangan;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,8 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 
@@ -36,11 +33,6 @@ class KeuanganResource extends Resource
                     ->relationship('kegiatan', 'nama_kegiatan')
                     ->label('Untuk Kegiatan')
                     ->required(),
-                // Forms\Components\Select::make('user_id')
-                //     ->relationship('user', 'name')
-                //     ->label('Diinput oleh')
-                //     ->default(Auth::id())
-                //     ->required(),
                 Forms\Components\DatePicker::make('tanggal')
                     ->required(),
                 Forms\Components\Select::make('jenis_transaksi')
@@ -49,17 +41,31 @@ class KeuanganResource extends Resource
                 Forms\Components\TextInput::make('jumlah')
                     ->required()
                     ->integer()
+                    ->minValue(1)
                     ->prefix('Rp')
-                    ->placeholder('Contoh: 100000'),
+                    ->placeholder('Contoh: 100000')
+                    ->validationMessages([
+                        'required' => 'Jumlah transaksi wajib diisi.',
+                        'integer' => 'Jumlah transaksi harus berupa angka.',
+                        'min' => 'Jumlah transaksi minimal Rp 1.',
+                    ]),
                 Forms\Components\Textarea::make('keterangan')
                     ->columnSpanFull()
                     ->required()
+                    ->maxLength(255)
                     ->placeholder('Masukkan keterangan transaksi'),
                 Forms\Components\FileUpload::make('bukti_file')
                     ->directory('keuangan/bukti')
                     ->visibility('public')
                     ->disk('public')
                     ->label('File Bukti')
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File Bukti harus berformat PDF, JPG, atau PNG.',
+                        'max' => 'Ukuran File Bukti maksimal 10 MB.',
+                        'required' => 'File Bukti transaksi wajib diunggah.',
+                    ])
                     ->required(),
             ]);
     }

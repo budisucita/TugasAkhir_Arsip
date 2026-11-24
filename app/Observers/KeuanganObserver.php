@@ -6,17 +6,10 @@ use App\Models\Keuangan;
 use App\Models\Log;
 use Illuminate\Support\Facades\Log as SysLog;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-
 
 
 class KeuanganObserver
 {
-    public function boot(): void
-    {
-        Keuangan::observe(KeuanganObserver::class);
-    }
-
     /**
      * Handle the Keuangan "created" event.
      */
@@ -121,14 +114,6 @@ class KeuanganObserver
         }
     }
 
-    public function deleting(Keuangan $keuangan): void
-    {
-        // 1. Hapus data dokumentasi/foto terkait terlebih dahulu (agar tidak error foreign key)
-        // $keuangan->dokumentasi()->each(function ($doc) {
-        //     $doc->delete(); 
-        // });
-    }
-
     /**
      * Handle the Keuangan "deleted" event.
      */
@@ -149,22 +134,6 @@ class KeuanganObserver
                 'keuangan_id' => $keuangan->id ?? null,
             ]);
         }
-    }
-
-    /**
-     * Handle the Keuangan "restored" event.
-     */
-    public function restored(Keuangan $keuangan): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Keuangan "force deleted" event.
-     */
-    public function forceDeleted(Keuangan $keuangan): void
-    {
-        //
     }
 }
 

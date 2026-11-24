@@ -24,7 +24,6 @@
 4. **Database**
    - Jalankan migrasi: `php artisan migrate --force`
    - Jalankan seeder: `php artisan db:seed --force`
-   - Generate permissions: `php artisan shield:generate --all --panel=admin`
 
 5. **Build Frontend**
    - `npm run build`

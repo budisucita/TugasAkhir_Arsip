@@ -229,6 +229,34 @@ return [
         'file_path' => 'File',
         'kegiatan_id' => 'Kegiatan',
         'user_id' => 'Pengguna',
+
+        // Field modul Keuangan
+        'jenis_transaksi' => 'Jenis Transaksi',
+        'jumlah' => 'Jumlah',
+        'keterangan' => 'Keterangan',
+        'bukti_file' => 'File Bukti',
+        'tanggal' => 'Tanggal',
+
+        // Field modul Surat
+        'no_surat' => 'Nomor Surat',
+        'pengirim' => 'Pengirim',
+        'perihal' => 'Perihal',
+        'tanggal_terima' => 'Tanggal Terima',
+        'file_surat' => 'File Surat',
+
+        // Field modul Anggota
+        'nama' => 'Nama',
+        'kontak' => 'Kontak',
+        'status' => 'Status',
+        'alamat' => 'Alamat',
+        'foto' => 'Foto',
+
+        // Field modul Pengaturan
+        'role' => 'Peran',
+
+        // Field modul Template Surat
+        'template_surat' => 'Template Surat',
+        'isi' => 'Isi',
     ],
 
 ];

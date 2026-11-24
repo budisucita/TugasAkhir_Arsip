@@ -9,10 +9,11 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Cache; // <-- Import Cache
 use Illuminate\Support\Facades\View;   // <-- Import View
 
-use Illuminate\Support\Facades\Gate;
-
 use App\Models\Dokumentasi;
 use App\Observers\DokumentasiObserver;
+
+use App\Models\Kegiatan;
+use App\Observers\KegiatanObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Keuangan::observe(KeuanganObserver::class);
         Dokumentasi::observe(DokumentasiObserver::class);
+        Kegiatan::observe(KegiatanObserver::class);
 
         // Coba ambil settings dari cache terlebih dahulu.
         // Jika tidak ada, ambil dari database, ubah menjadi collection,

@@ -5,8 +5,6 @@ namespace App\Filament\Pages;
 use Filament\Pages\Page;
 use App\Models\Setting;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;

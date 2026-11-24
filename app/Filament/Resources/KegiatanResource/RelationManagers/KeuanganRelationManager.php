@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class KeuanganRelationManager extends RelationManager
@@ -39,13 +37,27 @@ class KeuanganRelationManager extends RelationManager
                 Forms\Components\TextInput::make('jumlah')
                     ->required()
                     ->numeric()
-                    ->prefix('Rp'),
+                    ->minValue(1)
+                    ->prefix('Rp')
+                    ->validationMessages([
+                        'required' => 'Jumlah transaksi wajib diisi.',
+                        'numeric' => 'Jumlah transaksi harus berupa angka.',
+                        'min' => 'Jumlah transaksi minimal Rp 1.',
+                    ]),
                 Forms\Components\Textarea::make('keterangan')
                     ->columnSpanFull()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\FileUpload::make('bukti_file')
                     ->directory('keuangan/bukti')
                     ->visibility('public')
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                    ->maxSize(10240)
+                    ->validationMessages([
+                        'mimetypes' => 'File Bukti harus berformat PDF, JPG, atau PNG.',
+                        'max' => 'Ukuran File Bukti maksimal 10 MB.',
+                        'required' => 'File Bukti transaksi wajib diunggah.',
+                    ])
                     ->label('File Bukti')
                     ->required(),
             ]);
@@ -74,10 +86,5 @@ class KeuanganRelationManager extends RelationManager
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ]);
-            // ->bulkActions([
-            //     Tables\Actions\BulkActionGroup::make([
-            //         Tables\Actions\DeleteBulkAction::make(),
-            //     ]),
-            // ]);
     }
 }

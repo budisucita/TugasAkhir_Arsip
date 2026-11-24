@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnggotaResource\Pages;
-use App\Filament\Resources\AnggotaResource\RelationManagers;
 use App\Models\Anggota;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,7 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AnggotaResource extends Resource
 {
@@ -49,6 +47,12 @@ class AnggotaResource extends Resource
                     ->image()
                     ->directory('anggota/foto')
                     ->visibility('public')
+                    ->maxSize(5120)
+                    ->validationMessages([
+                        'image' => 'File Foto harus berupa gambar.',
+                        'max' => 'Ukuran Foto maksimal 5 MB.',
+                        'required' => 'Foto anggota wajib diunggah.',
+                    ])
                     ->label('Foto Anggota')
                     ->required(),
             ]);

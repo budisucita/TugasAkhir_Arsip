@@ -5,22 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Keuangan</title>
     <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
             color: #000;
+            margin: 0;
         }
         .kop {
             display: grid;
-            grid-template-columns: 0px 1fr;
+            grid-template-columns: 90px 1fr;
             align-items: center;
+            gap: 12px;
             margin-bottom: 8px;
+        }
+        .kop-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .kop img {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            margin-left: 50px
         }
         .kop-text {
             text-align: center;
@@ -110,12 +120,32 @@
             text-align: right;
             margin-bottom: 8px;
         }
+        .signature-block {
+            page-break-inside: avoid;
+        }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            thead {
+                display: table-header-group;
+            }
+            tr {
+                page-break-inside: avoid;
+            }
+            .signature-block {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="kop">
-        <img src="{{ asset('images/logo-dharma-bhakti.png') }}" alt="Logo Dharma Bhakti">
+        <div class="kop-logo">
+            <img src="{{ asset('images/logo-dharma-bhakti.png') }}" alt="Logo Dharma Bhakti">
+        </div>
         <div class="kop-text">
             <h1>SEKA TERUNA-TERUNI DHARMA BHAKTI</h1>
             <p>BR. KARYA DHARMA KELURAHAN SELATAN</p>
