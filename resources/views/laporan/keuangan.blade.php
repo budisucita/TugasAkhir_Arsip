@@ -124,10 +124,15 @@
             page-break-inside: avoid;
         }
         .actions-bar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             display: flex;
             justify-content: flex-end;
             gap: 8px;
+            padding: 8px 0;
             margin-bottom: 16px;
+            background-color: #fff;
         }
         .actions-bar button {
             font-family: Arial, sans-serif;

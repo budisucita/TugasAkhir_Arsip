@@ -39,19 +39,31 @@ class AppServiceProvider extends ServiceProvider
         Dokumentasi::observe(DokumentasiObserver::class);
         Kegiatan::observe(KegiatanObserver::class);
 
-        // Coba ambil settings dari cache terlebih dahulu.
-        // Jika tidak ada, ambil dari database, ubah menjadi collection,
-        // dan simpan di cache selamanya.
-        try {
-            $settings = Cache::rememberForever('settings', function () {
-                // Kita bungkus dengan collect() untuk mengubah array menjadi Laravel Collection
-                return collect(Setting::pluck('value', 'key'));
-            });
-        } catch (\Exception $e) {
-            $settings = collect([]);
-        }
-        
-        // Bagikan variabel $settings ke semua view yang ada di aplikasi.
-        View::share('settings', $settings);
+        // Ambil & cache data settings HANYA saat view publik dirender.
+        //
+        // Sebelumnya logika ini dijalankan pada setiap request (termasuk request
+        // internal Livewire & panel admin Filament yang tidak membutuhkan $settings),
+        // sehingga setiap interaksi admin ikut memanggil cache/DB settings secara
+        // sia-sia. Dengan View::composer, pengambilan data hanya terjadi ketika salah
+        // satu view publik di bawah ini benar-benar dirender.
+        //
+        // Data diambil dari cache 'settings'. Jika belum ada, ambil dari database,
+        // ubah menjadi collection, lalu simpan di cache selamanya. Cache di-invalidate
+        // pada PengaturanWebsite::save() via Cache::forget('settings').
+        View::composer(
+            ['layouts.public', 'welcome', 'agenda', 'agenda-show', 'galeri', 'pages.*'],
+            function ($view) {
+                try {
+                    $settings = Cache::rememberForever('settings', function () {
+                        // collect() mengubah array hasil pluck menjadi Laravel Collection
+                        return collect(Setting::pluck('value', 'key'));
+                    });
+                } catch (\Exception $e) {
+                    $settings = collect([]);
+                }
+
+                $view->with('settings', $settings);
+            }
+        );
     }
 }

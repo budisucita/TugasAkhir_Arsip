@@ -131,7 +131,7 @@ chown -R www-data:www-data storage bootstrap/cache
 ```
 
 **2. Tampilan Berantakan / Style Hilang**
-Pastikan `npm run dev` sedang berjalan, atau jika di production, jalankan `npm run build`.
+Hentikan `npm run dev`, lalu jalankan `npm run build` sekali saja. Hindari menjalankan dev server secara terus-menerus pada environment Windows (lihat bagian *Optimasi Performa Panel Admin*).
 
 **3. Error Filament / Livewire**
 Jika terjadi error pada panel admin, coba bersihkan cache:
@@ -173,9 +173,82 @@ Opsi penting:
 
 Untuk penggunaan di server production:
 1.  Ubah `APP_ENV=production` dan `APP_DEBUG=false` di `.env`.
-2.  Jalankan `npm run build` untuk membuild aset.
-3.  Pastikan menggunakan `php artisan config:cache`, `route:cache`, dan `view:cache` untuk performa.
+2.  Jalankan `composer run deploy` (mencakup `npm run build`, migrasi, cache Filament, dan optimasi cache Laravel).
+3.  Pastikan **OPcache aktif** pada `php.ini` server (lihat bagian *Optimasi Performa Panel Admin*).
 4.  Gunakan supervisor untuk menjalankan queue worker jika diperlukan.
+
+---
+
+## ⚡ Optimasi Performa Panel Admin (Windows / Laragon)
+
+Panel admin Filament 3 yang memakai tema Vite kustom (`->viteTheme('resources/css/filament/admin/theme.css')`) berpotensi terasa berat pada environment Windows (NTFS) bila aset belum dibuild dan OPcache tidak aktif.
+
+### Akar Masalah
+1. **Pemindaian berkas vendor oleh Tailwind.** `resources/css/filament/admin/tailwind.config.js` mencantumkan `./vendor/filament/**/*.blade.php` pada `content`. Selama `npm run dev` berjalan, Vite + Tailwind JIT memantau **seluruh** berkas Blade vendor tersebut. Pada NTFS, globbing ribuan berkas ini sangat lambat dan dipicu ulang setiap ada perubahan, sehingga setiap interaksi menu terasa berat.
+2. **Aset belum dibuild.** Tanpa `npm run build`, CSS tema disajikan lewat dev server (memerlukan `public/hot`) sehingga pemindaian berjalan terus-menerus pada setiap permintaan.
+3. **Cache Blade Icons & komponen Filament belum dibuat.** Filament memindai ratusan ikon SVG dan komponen pada setiap permintaan.
+4. **OPcache tidak aktif.** Setiap permintaan memaksa PHP mem-parse ulang ratusan berkas PHP dari disk NTFS.
+
+### Langkah Optimasi
+```bash
+# 1. Hentikan dev server (agar tidak ada pemindaian berkas vendor).
+#    Tekan Ctrl+C pada terminal `npm run dev` jika sedang berjalan.
+
+# 2. Build aset produksi sekali saja.
+npm run build
+
+# 3. Aktifkan seluruh cache bawaan Filament (komponen + Blade Icons).
+php artisan filament:optimize
+```
+
+4. **Aktifkan OPcache** pada `php.ini` PHP yang dipakai Laragon. Versi PHP aktif dapat dilihat di `C:\laragon\etc\apache2\mod_php.conf` (mis. `php-8.2.30`):
+```ini
+zend_extension=opcache
+[opcache]
+opcache.enable=1
+```
+   > **Penting:** Restart Laragon (Stop All → Start All) setelah mengubah `php.ini` agar OPcache aktif pada proses web server. Cek cepat via CLI: `php -r "var_dump(extension_loaded('Zend OPcache'));"`.
+
+### Alur Deployment
+Seluruh langkah di atas tersedia sebagai satu skrip gabungan:
+```bash
+composer run deploy
+```
+Skrip menjalankan secara berurutan: `npm run build` → `migrate --force` → `filament:optimize` → `optimize` (cache config/route/view).
+
+### Verifikasi
+Ukur TTFB halaman login panel admin (sesuaikan URL dengan virtual host Anda):
+```powershell
+$u = 'http://localhost/TugasAkhir_Arsip/public/admin/login'
+1..6 | ForEach-Object { (Measure-Command { Invoke-WebRequest $u -UseBasicParsing | Out-Null }).TotalMilliseconds }
+```
+Panel dinyatakan teroptimasi bila:
+- TTFB stabil pada permintaan hangat dan turun signifikan dibanding kondisi sebelum optimasi.
+- Tidak ada proses `npm run dev` yang berjalan (`public/hot` tidak ada).
+- Berkas cache tersedia: `public/build/manifest.json`, `bootstrap/cache/blade-icons.php`, dan `bootstrap/cache/filament/`.
+
+### Optimasi Pengambilan Data `settings` (View Composer)
+Sebelumnya `AppServiceProvider::boot()` menjalankan `Cache::rememberForever('settings', ...)` lalu `View::share('settings', ...)` pada **setiap** request — termasuk request internal Livewire dan panel admin Filament yang tidak membutuhkan `$settings`. Ini menambah beban cache/DB pada setiap interaksi admin.
+
+Pengambilan data kini dipindah ke `View::composer` dan hanya dieksekusi ketika salah satu view publik berikut dirender:
+```php
+['layouts.public', 'welcome', 'agenda', 'agenda-show', 'galeri', 'pages.*']
+```
+Composer memanggil `$view->with('settings', $settings)`, sehingga `$settings` tetap tersedia di semua view publik (termasuk `@section('title', ...)` pada child view).
+
+Dampak:
+- Request panel admin Filament & aksi Livewire tidak lagi menyentuh cache maupun tabel `settings`.
+- Logika cache tidak berubah: `rememberForever('settings')` untuk baca, dan `Cache::forget('settings')` di `PengaturanWebsite::save()` untuk invalidasi.
+
+Hasil verifikasi (bootstrap app + query log):
+```
+Request /admin/login  -> settings composer hits = 0, settings DB queries = 0
+Request /kontak       -> settings composer hits = 2, settings DB queries = 1 (cold cache)
+```
+
+### Tuning Tambahan (Opsional)
+- Naikkan `opcache.max_accelerated_files` (mis. `20000`) bila jumlah berkas PHP proyek melebihi nilai default `10000`.
+- Kecualikan folder `vendor`, `storage`, dan `public/build` dari pemindaian real-time Windows Defender untuk mengurangi beban I/O NTFS.
 
 ---
 © 2024 - 2025 ST. Dharma Bhakti

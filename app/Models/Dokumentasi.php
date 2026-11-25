@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Dokumentasi extends Model
 {
@@ -37,5 +38,21 @@ class Dokumentasi extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * URL publik terpusat untuk berkas dokumentasi.
+     *
+     * Selalu memakai disk default aplikasi (env FILESYSTEM_DISK) sebagai satu
+     * sumber kebenaran sehingga konsisten di lokal (public) maupun saat
+     * dideploy dengan S3.
+     */
+    public function getFileUrlAttribute(): ?string
+    {
+        if (blank($this->file_path)) {
+            return null;
+        }
+
+        return Storage::disk(config('filesystems.default'))->url($this->file_path);
     }
 }

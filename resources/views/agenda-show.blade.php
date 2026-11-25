@@ -22,9 +22,9 @@
                 <!-- Main Image -->
                 <div class="rounded-2xl overflow-hidden relative group shadow-2xl border border-white/10" data-aos="fade-up">
                     @if($kegiatan->dokumentasi->isNotEmpty())
-                        <img src="{{ Storage::url($kegiatan->dokumentasi->first()->file_path) }}" alt="{{ $kegiatan->nama_kegiatan }}" class="w-full h-full object-cover aspect-video rounded-lg">
+                        <img src="{{ $kegiatan->dokumentasi->first()->file_url }}" alt="{{ $kegiatan->nama_kegiatan }}" class="w-full h-full object-cover aspect-video rounded-lg">
                     @else
-                        <div class="w-full h-full bg-slate-800 flex items-center justify-center">
+                        <div class="w-full h-full aspect-video bg-slate-800 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed">
-                        {!! $kegiatan->deskripsi !!}
+                        {!! Str::sanitizeHtml($kegiatan->deskripsi) !!}
                     </div>
                 </div>
 
@@ -80,7 +80,7 @@
                         @foreach($kegiatan->dokumentasi as $doc)
                             <div class="relative group rounded-2xl overflow-hidden glass-card hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300" data-aos="fade-up">
                                 <div class="w-full aspect-video relative overflow-hidden rounded-2xl">
-                                    <img src="{{ Storage::url($doc->file_path) }}" 
+                                    <img src="{{ $doc->file_url }}" 
                                          alt="Dokumentasi" 
                                          class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -88,7 +88,7 @@
                                             <p class="text-white font-medium text-sm line-clamp-2 mb-1">Dokumentasi</p>
                                             <p class="text-gray-400 text-xs">{{ $kegiatan->created_at->format('d M Y') }}</p>
                                         </div>
-                                        <a href="{{ Storage::url($doc->file_path) }}" 
+                                        <a href="{{ $doc->file_url }}" 
                                            target="_blank"
                                            class="absolute bottom-6 right-6 px-4 py-2 min-h-[44px] rounded-xl bg-white text-black hover:bg-amber-400 transition-colors shadow-lg transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 delay-75"
                                            title="Lihat Foto">
@@ -126,7 +126,7 @@
                         <div class="flex gap-4">
                             <div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                                 @if($related->dokumentasi->isNotEmpty())
-                                    <img src="{{ Storage::disk('public')->url($related->dokumentasi->first()->file_path) }}" alt="{{ $related->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    <img src="{{ $related->dokumentasi->first()->file_url }}" alt="{{ $related->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                 @else
                                     <div class="w-full h-full bg-slate-800 flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -149,4 +149,23 @@ class FilamentAccessTest extends TestCase
             ->get('/admin/logs/' . $log->getKey())
             ->assertSuccessful();
     }
+
+    public function test_halaman_create_dan_edit_log_sudah_tidak_terdaftar(): void
+    {
+        $log = \App\Models\Log::create([
+            'user_id' => $this->admin()->id,
+            'action' => 'created',
+            'description' => 'Uji halaman log yang dihapus',
+        ]);
+
+        $this->actingAs($this->admin());
+
+        // CreateLog & EditLog dihapus: tidak lagi terdaftar di LogResource::getPages().
+        $this->assertFalse(\App\Filament\Resources\LogResource::hasPage('create'));
+        $this->assertFalse(\App\Filament\Resources\LogResource::hasPage('edit'));
+
+        // URL halaman mati tidak melayani aksi create/edit (tidak ada rute yang valid).
+        $this->get('/admin/logs/create')->assertNotFound();
+        $this->get('/admin/logs/' . $log->getKey() . '/edit')->assertNotFound();
+    }
 }

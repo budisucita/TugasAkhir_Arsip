@@ -39,7 +39,7 @@ class DokumentasiResource extends Resource
                 Forms\Components\FileUpload::make('file_path')
                     ->directory('dokumentasi/file')
                     ->visibility('public')
-                    ->disk('public')
+                    ->disk(config('filesystems.default'))
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->label('File Dokumentasi')
                     ->image()
@@ -66,7 +66,7 @@ class DokumentasiResource extends Resource
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('file_path')
                     ->label('Preview')
-                    ->disk('public')
+                    ->disk(config('filesystems.default'))
                     ->visible(fn ($record) => $record && $record->tipe === 'foto'),
                 Tables\Columns\TextColumn::make('tipe')
                     ->badge(),
@@ -147,7 +147,7 @@ class DokumentasiResource extends Resource
                     ->label('Preview Gambar')
                     ->height(200)
                     ->width(250)
-                    ->disk('public')
+                    ->disk(config('filesystems.default'))
                     ->visible(fn ($record) => $record && $record->tipe === 'foto'),
             ]);
     }

@@ -114,9 +114,11 @@ class LogResource extends Resource
                     ]),
 
                 // 2. Filter berdasarkan User (Pelaku)
+                // Gunakan closure agar query daftar user hanya dijalankan saat filter dirender,
+                // bukan setiap kali LogResource dimuat.
                 SelectFilter::make('user_id')
                     ->label('User')
-                    ->options(User::all()->pluck('name', 'id'))
+                    ->options(fn () => User::pluck('name', 'id'))
                     ->searchable(),
 
                 // 3. Filter berdasarkan rentang tanggal

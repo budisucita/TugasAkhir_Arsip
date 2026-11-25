@@ -35,6 +35,7 @@ class DokumentasiRelationManager extends RelationManager
                 Forms\Components\FileUpload::make('file_path')
                     ->directory('dokumentasi/file')
                     ->visibility('public')
+                    ->disk(config('filesystems.default'))
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'video/mp4'])
                     ->maxSize(20480)
                     ->validationMessages([
@@ -56,7 +57,7 @@ class DokumentasiRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\ImageColumn::make('file_path')
                     ->label('Preview')
-                    ->disk('public')
+                    ->disk(config('filesystems.default'))
                     ->visible(fn ($record) => $record && $record->tipe === 'foto'),
                 Tables\Columns\TextColumn::make('tipe')
                     ->badge(),

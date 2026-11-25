@@ -13,9 +13,7 @@ class LandingPageController extends Controller
 {
     public function index()
     {
-        $settings = Cache::rememberForever('settings', function () {
-            return Setting::all()->pluck('value', 'key');
-        });
+        $settings = $this->getSettings();
         
         $kegiatanTerbaru = Cache::remember('kegiatan_terbaru_landing', 3600, function () {
             return Kegiatan::with(['user', 'dokumentasi' => function($q) {
@@ -56,9 +54,7 @@ class LandingPageController extends Controller
 
     public function galeri(Request $request)
     {
-        $settings = Cache::rememberForever('settings', function () {
-            return Setting::all()->pluck('value', 'key');
-        });
+        $settings = $this->getSettings();
 
         $query = Dokumentasi::with('kegiatan')->where('tipe', 'foto');
 
@@ -80,9 +76,7 @@ class LandingPageController extends Controller
 
     public function agenda(Request $request)
     {
-        $settings = Cache::rememberForever('settings', function () {
-            return Setting::all()->pluck('value', 'key');
-        });
+        $settings = $this->getSettings();
 
         $query = Kegiatan::with(['dokumentasi' => function($q) {
             $q->where('tipe', 'foto')->latest();
@@ -142,9 +136,7 @@ class LandingPageController extends Controller
 
     public function agendaDetail($id)
     {
-        $settings = Cache::rememberForever('settings', function () {
-            return Setting::all()->pluck('value', 'key');
-        });
+        $settings = $this->getSettings();
 
         $kegiatan = Kegiatan::with(['dokumentasi', 'user'])->findOrFail($id);
 
@@ -178,6 +170,11 @@ class LandingPageController extends Controller
         return view('pages.contact', ['settings' => $this->getSettings()]);
     }
 
+    /**
+     * Sumber tunggal (single source of truth) data settings portal publik.
+     * Hasilnya di-cache permanen pada key 'settings' sehingga pemanggilan
+     * dari method mana pun tidak menyentuh database.
+     */
     private function getSettings()
     {
         return Cache::rememberForever('settings', function () {

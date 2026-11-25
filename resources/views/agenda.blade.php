@@ -26,7 +26,7 @@
                     <!-- Image -->
                     <div class="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
                         @if($nextEvent->dokumentasi->isNotEmpty())
-                            <img src="{{ Storage::url($nextEvent->dokumentasi->first()->file_path) }}" alt="{{ $nextEvent->nama_kegiatan }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                            <img src="{{ $nextEvent->dokumentasi->first()->file_url }}" alt="{{ $nextEvent->nama_kegiatan }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                         @else
                             <div class="w-full h-full bg-slate-800 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +52,7 @@
                         </div>
                         
                         <div class="text-gray-400 line-clamp-3">
-                            {!! $nextEvent->deskripsi !!}
+                            {!! Str::sanitizeHtml($nextEvent->deskripsi) !!}
                         </div>
                         
                         <a href="{{ route('agenda.show', $nextEvent->id) }}" class="inline-flex min-h-[44px] px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-amber-400 transition-all duration-300 shadow-lg hover:shadow-amber-500/25 items-center gap-2">
@@ -84,7 +84,7 @@
                 <a href="{{ route('agenda.show', $pop->id) }}" class="glass-card rounded-xl overflow-hidden group block" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 50 }}">
                     <div class="aspect-square relative overflow-hidden">
                         @if($pop->dokumentasi->isNotEmpty())
-                            <img src="{{ Storage::url($pop->dokumentasi->first()->file_path) }}" alt="{{ $pop->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <img src="{{ $pop->dokumentasi->first()->file_url }}" alt="{{ $pop->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         @else
                             <div class="w-full h-full bg-slate-800 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,7 +193,7 @@
                     <!-- Image -->
                     <div class="relative h-56 overflow-hidden">
                         @if($item->dokumentasi->isNotEmpty())
-                            <img src="{{ Storage::disk('public')->url($item->dokumentasi->first()->file_path) }}" alt="{{ $item->nama_kegiatan }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                            <img src="{{ $item->dokumentasi->first()->file_url }}" alt="{{ $item->nama_kegiatan }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                         @else
                             <div class="w-full h-full bg-slate-800 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

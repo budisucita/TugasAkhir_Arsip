@@ -27,8 +27,8 @@ class DokumentasiObserver
         // Jika file diganti, hapus file lama (logika ini sering ditangani Filament, tapi bisa ditambahkan jika perlu)
         if ($dokumentasi->isDirty('file_path')) {
             $originalPath = $dokumentasi->getOriginal('file_path');
-            if ($originalPath && Storage::disk('public')->exists($originalPath)) {
-                Storage::disk('public')->delete($originalPath);
+            if ($originalPath && Storage::disk(config('filesystems.default'))->exists($originalPath)) {
+                Storage::disk(config('filesystems.default'))->delete($originalPath);
             }
         }
     }
@@ -41,9 +41,9 @@ class DokumentasiObserver
         $this->clearCache();
         
         // Pastikan file fisik terhapus
-        if ($dokumentasi->file_path && Storage::disk('public')->exists($dokumentasi->file_path)) {
+        if ($dokumentasi->file_path && Storage::disk(config('filesystems.default'))->exists($dokumentasi->file_path)) {
             try {
-                Storage::disk('public')->delete($dokumentasi->file_path);
+                Storage::disk(config('filesystems.default'))->delete($dokumentasi->file_path);
                 Log::info("File dokumentasi dihapus: " . $dokumentasi->file_path);
             } catch (\Exception $e) {
                 Log::error("Gagal menghapus file dokumentasi: " . $e->getMessage());
@@ -66,8 +66,8 @@ class DokumentasiObserver
     {
         $this->clearCache();
         
-        if ($dokumentasi->file_path && Storage::disk('public')->exists($dokumentasi->file_path)) {
-            Storage::disk('public')->delete($dokumentasi->file_path);
+        if ($dokumentasi->file_path && Storage::disk(config('filesystems.default'))->exists($dokumentasi->file_path)) {
+            Storage::disk(config('filesystems.default'))->delete($dokumentasi->file_path);
         }
     }
 

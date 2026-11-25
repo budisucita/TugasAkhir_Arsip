@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Filament\Widgets\StatsOverview;
 use App\Models\Keuangan;
 use App\Models\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log as SysLog;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,6 +17,8 @@ class KeuanganObserver
      */
     public function created(Keuangan $keuangan): void
     {
+        $this->clearCache();
+
         try {
             Log::create([
                 'user_id' => Auth::id(),
@@ -38,6 +42,8 @@ class KeuanganObserver
      */
     public function updated(Keuangan $keuangan): void
     {
+        $this->clearCache();
+
         $perubahan = [];
 
         // 1. Cek Perubahan KEGIATAN
@@ -119,6 +125,8 @@ class KeuanganObserver
      */
     public function deleted(Keuangan $keuangan): void
     {
+        $this->clearCache();
+
         try {
             Log::create([
                 'user_id'     => Auth::id(),
@@ -134,6 +142,15 @@ class KeuanganObserver
                 'keuangan_id' => $keuangan->id ?? null,
             ]);
         }
+    }
+
+    /**
+     * Bersihkan cache statistik Dashboard agar nilai pemasukan/pengeluaran
+     * langsung diperbarui setelah ada perubahan data keuangan.
+     */
+    private function clearCache(): void
+    {
+        Cache::forget(StatsOverview::CACHE_KEY);
     }
 }
 

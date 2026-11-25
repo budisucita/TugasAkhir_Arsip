@@ -49,9 +49,8 @@
                         <div class="relative group rounded-2xl overflow-hidden glass-card hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300" data-aos="fade-up">
                             <div class="w-full aspect-video relative overflow-hidden rounded-2xl">
                                 @php
-                                    $filePath = $doc->file_path ?? null;
-                                    $imageUrl = $filePath ? Illuminate\Support\Facades\Storage::url($filePath) : 'https://placehold.co/800x600/1e293b/fbbf24?text=Gambar+Tidak+Tersedia';
-                                    $downloadUrl = $filePath ? Illuminate\Support\Facades\Storage::disk('public')->url($filePath) : '#';
+                                    $imageUrl = $doc->file_url ?? 'https://placehold.co/800x600/1e293b/fbbf24?text=Gambar+Tidak+Tersedia';
+                                    $downloadUrl = $doc->file_url ?? '#';
                                 @endphp
                                 <img src="{{ $imageUrl }}" 
                                      alt="{{ $doc->kegiatan?->nama_kegiatan ?? 'Dokumentasi' }}" 

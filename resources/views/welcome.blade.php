@@ -2,10 +2,6 @@
 
 @section('title', ($settings ?? collect())->get('judul_website', 'ST. Dharma Bhakti'))
 
-@push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-@endpush
-
 @section('content')
 
     <!-- Hero Section -->
@@ -77,9 +73,7 @@
                             @foreach($heroImages as $doc)
                                 <div class="swiper-slide w-[90vw] sm:w-[500px] h-[200px] sm:h-[300px] bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                                     @php
-                                        // Handle both Setting (string) and Dokumentasi (model with accessor) paths
-                                        $path = $doc->is_setting ?? false ? $doc->file_path : $doc->file_path;
-                                        $url = Illuminate\Support\Facades\Storage::url($path);
+                                        $url = $doc->file_url;
                                     @endphp
                                     <img src="{{ $url }}" 
                                          class="w-full h-full object-cover" 
@@ -120,8 +114,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
                 @forelse($kegiatanTerbaru->take(4) as $index => $kegiatan)
                     @php
-                        $thumb = optional($kegiatan->dokumentasi->first())->file_path;
-                        $thumbUrl = $thumb ? Illuminate\Support\Facades\Storage::url($thumb) : 'https://placehold.co/800x600/1e293b/fbbf24?text=Kegiatan';
+                        $thumbUrl = optional($kegiatan->dokumentasi->first())->file_url ?? 'https://placehold.co/800x600/1e293b/fbbf24?text=Kegiatan';
                         // First item is big (Featured)
                         $classes = $index === 0 ? 'md:col-span-2 md:row-span-2' : 'col-span-1 row-span-1';
                         $imageHeight = $index === 0 ? 'h-full' : 'h-48 md:h-full';
@@ -173,7 +166,7 @@
                  x-data="{ lightboxOpen: false, lightboxSrc: '' }"
                  x-effect="document.body.style.overflow = lightboxOpen ? 'hidden' : ''">
                 @forelse($dokumentasiTerbaru->take(12) as $doc)
-                    @php $photoUrl = Illuminate\Support\Facades\Storage::disk('public')->url($doc->file_path); @endphp
+                    @php $photoUrl = $doc->file_url; @endphp
                     <button type="button"
                             class="aspect-square glass-card rounded-2xl p-2 flex items-center justify-center group relative overflow-hidden hover:bg-white/5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c0a09]"
                             data-aos="fade-up"
@@ -280,34 +273,35 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    const swiper = new Swiper('.mySwiper', {
-        effect: 'coverflow',
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: 'auto',
-        speed: 1000,
-        coverflowEffect: {
-            rotate: 0,
-            stretch: 0,
-            depth: 100,
-            modifier: 2.5,
-            slideShadows: true,
-        },
-        autoplay: {
-            delay: 2500,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: false,
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-        loop: true,
-        loopedSlides: 6,
-        observer: true,
-        observeParents: true,
+    document.addEventListener('DOMContentLoaded', () => {
+        new Swiper('.mySwiper', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto',
+            speed: 1000,
+            coverflowEffect: {
+                rotate: 0,
+                stretch: 0,
+                depth: 100,
+                modifier: 2.5,
+                slideShadows: true,
+            },
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            loop: true,
+            loopedSlides: 6,
+            observer: true,
+            observeParents: true,
+        });
     });
 </script>
 @endpush
