@@ -123,6 +123,30 @@
         .signature-block {
             page-break-inside: avoid;
         }
+        .actions-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .actions-bar button {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+        .btn-print {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+            color: #000;
+            font-weight: bold;
+        }
+        .btn-close {
+            background-color: #fff;
+            color: #000;
+        }
         @media print {
             body {
                 -webkit-print-color-adjust: exact;
@@ -137,10 +161,18 @@
             .signature-block {
                 page-break-inside: avoid;
             }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
 <body>
+
+    <div class="actions-bar no-print">
+        <button type="button" class="btn-print" onclick="window.print()">Cetak</button>
+        <button type="button" class="btn-close" onclick="window.close()">Tutup</button>
+    </div>
 
     <div class="kop">
         <div class="kop-logo">
@@ -148,7 +180,7 @@
         </div>
         <div class="kop-text">
             <h1>SEKA TERUNA-TERUNI DHARMA BHAKTI</h1>
-            <p>BR. KARYA DHARMA KELURAHAN SELATAN</p>
+            <p>BR. KARYA DHARMA KELURAHAN SESETAN</p>
             <p>Jl. Gurita I No. 9, Sesetan</p>
             <p>Email: st.dharmabhaktisesetan@gmail.com</p>
         </div>

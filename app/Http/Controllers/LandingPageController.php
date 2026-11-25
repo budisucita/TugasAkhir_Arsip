@@ -162,4 +162,26 @@ class LandingPageController extends Controller
             'relatedKegiatan' => $relatedKegiatan,
         ]);
     }
+
+    public function privacy()
+    {
+        return view('pages.privacy', ['settings' => $this->getSettings()]);
+    }
+
+    public function terms()
+    {
+        return view('pages.terms', ['settings' => $this->getSettings()]);
+    }
+
+    public function contact()
+    {
+        return view('pages.contact', ['settings' => $this->getSettings()]);
+    }
+
+    private function getSettings()
+    {
+        return Cache::rememberForever('settings', function () {
+            return Setting::all()->pluck('value', 'key');
+        });
+    }
 }

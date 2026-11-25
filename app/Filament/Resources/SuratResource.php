@@ -74,7 +74,7 @@ class SuratResource extends Resource
                 Tables\Columns\TextColumn::make('pengirim')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal_terima')
-                    ->date()
+                    ->date('d M Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('perihal')
                     ->limit(50),
@@ -151,7 +151,7 @@ class SuratResource extends Resource
                         Infolists\Components\TextEntry::make('no_surat'),
                         Infolists\Components\TextEntry::make('pengirim'),
                         Infolists\Components\TextEntry::make('tanggal_terima')
-                            ->date(),
+                            ->date('d M Y'),
                         Infolists\Components\TextEntry::make('perihal')
                             ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('user.name')

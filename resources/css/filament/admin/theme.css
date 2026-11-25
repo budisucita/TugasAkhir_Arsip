@@ -1,0 +1,8 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+/* Filament tidak menyertakan aturan x-cloak, dibutuhkan oleh komponen pratinjau. */
+[x-cloak] {
+    display: none !important;
+}

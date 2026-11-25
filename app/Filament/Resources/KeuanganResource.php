@@ -76,7 +76,7 @@ class KeuanganResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['kegiatan']))
             ->columns([
                 Tables\Columns\TextColumn::make('tanggal')
-                    ->date()
+                    ->date('d M Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('kegiatan.nama_kegiatan')
                     ->default('Umum')
@@ -185,7 +185,7 @@ class KeuanganResource extends Resource
                 Infolists\Components\Section::make('Informasi Keuangan')
                     ->schema([
                         Infolists\Components\TextEntry::make('kegiatan.nama_kegiatan'),
-                        Infolists\Components\TextEntry::make('tanggal')->date(),
+                        Infolists\Components\TextEntry::make('tanggal')->date('d M Y'),
                         Infolists\Components\TextEntry::make('jenis_transaksi')->badge(),
                         Infolists\Components\TextEntry::make('jumlah')
                             ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),

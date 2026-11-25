@@ -75,7 +75,7 @@ class AnggotaResource extends Resource
                         'tidak aktif' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

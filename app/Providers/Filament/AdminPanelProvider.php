@@ -30,9 +30,10 @@ class AdminPanelProvider extends PanelProvider
             ->login(\App\Filament\Auth\CustomLogin::class)
             ->spa()
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => Color::Amber,
             ])
-            ->font('Poppins')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->font('Plus Jakarta Sans')
             ->brandName('Arsip Dharma Bhakti')
             ->brandLogo(fn () => view('filament.brand.logo'))
             ->brandLogoHeight('3rem')

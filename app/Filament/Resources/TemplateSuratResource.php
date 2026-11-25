@@ -61,7 +61,7 @@ class TemplateSuratResource extends Resource
                 Tables\Columns\TextColumn::make('nama_dokumen')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d M Y, H:i')
                     ->sortable(),
             ])
             ->filters([

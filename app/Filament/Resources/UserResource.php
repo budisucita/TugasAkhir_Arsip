@@ -19,6 +19,8 @@ class UserResource extends Resource
     
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
+    protected static ?string $navigationLabel = 'Pengguna';
+
     protected static ?string $navigationGroup = 'Pengaturan';
     
     public static function shouldRegisterNavigation(): bool
@@ -73,7 +75,7 @@ class UserResource extends Resource
                     ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

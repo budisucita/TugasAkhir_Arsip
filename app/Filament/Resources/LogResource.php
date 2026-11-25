@@ -80,7 +80,12 @@ class LogResource extends Resource
                         'warning' => 'updated',
                         'danger' => 'deleted',
                     ])
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)) // Huruf besar di awal
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'created' => 'Dibuat',
+                        'updated' => 'Diubah',
+                        'deleted' => 'Dihapus',
+                        default => ucfirst($state),
+                    })
                     ->sortable()
                     ->searchable(),
 
@@ -103,9 +108,9 @@ class LogResource extends Resource
                 SelectFilter::make('action')
                     ->label('Jenis Aksi')
                     ->options([
-                        'created' => 'Created (Buat Baru)',
-                        'updated' => 'Updated (Edit)',
-                        'deleted' => 'Deleted (Hapus)',
+                        'created' => 'Dibuat',
+                        'updated' => 'Diubah',
+                        'deleted' => 'Dihapus',
                     ]),
 
                 // 2. Filter berdasarkan User (Pelaku)
@@ -171,7 +176,13 @@ class LogResource extends Resource
                                     'success' => 'created',
                                     'warning' => 'updated',
                                     'danger'  => 'deleted',
-                                ]),
+                                ])
+                                ->formatStateUsing(fn (string $state): string => match ($state) {
+                                    'created' => 'Dibuat',
+                                    'updated' => 'Diubah',
+                                    'deleted' => 'Dihapus',
+                                    default => ucfirst($state),
+                                }),
 
                             // Ganti 'subject...' menjadi relasi 'keuangan'
                             TextEntry::make('keuangan.keterangan')

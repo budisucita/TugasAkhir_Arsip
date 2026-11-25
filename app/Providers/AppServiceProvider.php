@@ -31,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
     
     public function boot(): void
     {
+        // Terapkan locale Bahasa Indonesia untuk format tanggal (Carbon/Filament)
+        // agar nama bulan tampil dalam Bahasa Indonesia (mis. "Mei", "Agu", "Okt").
+        \Illuminate\Support\Carbon::setLocale('id');
+
         Keuangan::observe(KeuanganObserver::class);
         Dokumentasi::observe(DokumentasiObserver::class);
         Kegiatan::observe(KegiatanObserver::class);

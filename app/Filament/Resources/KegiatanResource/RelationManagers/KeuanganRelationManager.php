@@ -69,7 +69,7 @@ class KeuanganRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('keterangan')
             ->columns([
-                Tables\Columns\TextColumn::make('tanggal')->date()->sortable(),
+                Tables\Columns\TextColumn::make('tanggal')->date('d M Y')->sortable(),
                 Tables\Columns\TextColumn::make('jenis_transaksi')->badge()->color(fn (string $state): string => match ($state) {
                     'pemasukan' => 'success',
                     'pengeluaran' => 'warning',

@@ -108,7 +108,7 @@ class KegiatanResource extends Resource
                         'Dibatalkan' => 'danger',
                     }),
                 Tables\Columns\TextColumn::make('tanggal_mulai')
-                    ->date()
+                    ->date('d M Y')
                     ->sortable(),
                 Tables\Columns\IconColumn::make('proposal_file')
                     ->boolean()
@@ -202,9 +202,9 @@ class KegiatanResource extends Resource
                         Infolists\Components\TextEntry::make('lokasi')
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('tanggal_mulai')
-                            ->date(),
+                            ->date('d M Y'),
                         Infolists\Components\TextEntry::make('tanggal_selesai')
-                            ->date(),
+                            ->date('d M Y'),
                         Infolists\Components\TextEntry::make('deskripsi')
                             ->columnSpanFull()
                             ->html(),
