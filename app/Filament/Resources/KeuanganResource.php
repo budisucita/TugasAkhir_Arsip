@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\KeuanganResource\Pages;
 use App\Models\Keuangan;
+use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -56,8 +57,9 @@ class KeuanganResource extends Resource
                     ->placeholder('Masukkan keterangan transaksi'),
                 Forms\Components\FileUpload::make('bukti_file')
                     ->directory('keuangan/bukti')
-                    ->visibility('public')
-                    ->disk('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->label('File Bukti')
                     ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                     ->maxSize(10240)

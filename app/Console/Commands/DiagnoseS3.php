@@ -49,7 +49,7 @@ class DiagnoseS3 extends Command
                 ['Region', $config['region'] ?? 'NULL'],
                 ['Bucket', $config['bucket'] ?? 'NULL'],
                 ['Endpoint', $config['endpoint'] ?? 'NULL'],
-                ['Use Path Style', $config['use_path_style_endpoint'] ? 'true' : 'false'],
+                ['Use Path Style', ($config['use_path_style_endpoint'] ?? false) ? 'true' : 'false'],
             ]
         );
 
@@ -66,10 +66,10 @@ class DiagnoseS3 extends Command
             $this->info('✅ Database connection successful.');
             
             // Check metadata table
-            if (\Illuminate\Support\Facades\Schema::hasTable('dokumentasis')) {
-                $this->info('✅ Table `dokumentasis` exists.');
+            if (\Illuminate\Support\Facades\Schema::hasTable('dokumentasi')) {
+                $this->info('✅ Table `dokumentasi` exists.');
             } else {
-                $this->warn('⚠️  Table `dokumentasis` is missing.');
+                $this->warn('⚠️  Table `dokumentasi` is missing.');
             }
         } catch (\Exception $e) {
             $this->error('❌ Database Connection Failed: ' . $e->getMessage());

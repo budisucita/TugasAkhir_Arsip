@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Keuangan;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class KeuanganTrendChart extends ChartWidget
 {
@@ -67,8 +68,17 @@ class KeuanganTrendChart extends ChartWidget
     {
         $start = now()->subMonths(11)->startOfMonth();
 
+        // Format periode 'YYYY-MM' berbeda per driver database: SQLite memakai
+        // strftime(), sedangkan MySQL/MariaDB memakai DATE_FORMAT(). Ekspresi
+        // dipilih sesuai driver aktif agar grafik tetap berjalan pada environment
+        // pengujian (SQLite) maupun produksi (MySQL).
+        $periodeSql = match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', tanggal)",
+            default => "DATE_FORMAT(tanggal, '%Y-%m')",
+        };
+
         $rows = Keuangan::query()
-            ->selectRaw("DATE_FORMAT(tanggal, '%Y-%m') as periode")
+            ->selectRaw("{$periodeSql} as periode")
             ->selectRaw("SUM(CASE WHEN jenis_transaksi = 'pemasukan' THEN jumlah ELSE 0 END) as pemasukan")
             ->selectRaw("SUM(CASE WHEN jenis_transaksi = 'pengeluaran' THEN jumlah ELSE 0 END) as pengeluaran")
             ->whereNotNull('tanggal')

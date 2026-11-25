@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class TemplateSuratResource extends Resource
 {
@@ -37,8 +38,10 @@ class TemplateSuratResource extends Resource
                     ->label('File Template')
                     ->directory('template-surat')
                     ->visibility('public')
-                    ->disk('public')
-                    ->preserveFilenames()
+                    ->disk(config('filesystems.default'))
+                    // Tanpa preserveFilenames(): Filament menghasilkan nama berkas
+                    // unik (ULID) sehingga unggahan dengan nama sama tidak menimpa
+                    // berkas lama secara diam-diam di penyimpanan.
                     ->acceptedFileTypes([
                         'application/pdf',
                         'application/msword',
@@ -112,7 +115,9 @@ class TemplateSuratResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Action::make('download')
                     ->label('Download')
-                    ->url(fn ($record) => asset('storage/' . $record->file_path))
+                    ->url(fn ($record) => filled($record->file_path)
+                        ? Storage::disk(config('filesystems.default'))->url($record->file_path)
+                        : null)
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

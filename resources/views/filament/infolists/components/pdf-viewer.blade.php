@@ -1,12 +1,17 @@
 @php
-    use Illuminate\Support\Facades\Storage;
+    use App\Support\SecureFile;
 
     $path = $getState();
+    $record = $getRecord();
+    $field = $getName();
 
-    $disk = Storage::disk('public');
-    $exists = filled($path) && $disk->exists($path);
+    // Berkas sensitif hanya disajikan lewat rute terproteksi (auth + Policy),
+    // bukan URL /storage publik.
+    $url = SecureFile::urlFor($record, $field);
 
-    $url = $exists ? $disk->url($path) : null;
+    $disk = SecureFile::disk();
+    $exists = filled($path) && filled($url) && $disk->exists($path);
+
     $filename = $exists ? basename($path) : null;
     $extension = $exists ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
     $bytes = $exists ? (int) $disk->size($path) : 0;

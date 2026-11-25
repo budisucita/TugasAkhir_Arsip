@@ -33,18 +33,23 @@ class DokumentasiResource extends Resource
                     ->relationship('kegiatan', 'nama_kegiatan')
                     ->required(),
                 Forms\Components\Select::make('tipe')
-                    ->options(['foto' => 'Foto'])
+                    ->options(['foto' => 'Foto', 'video' => 'Video'])
                     ->required()
                     ->reactive(),
                 Forms\Components\FileUpload::make('file_path')
                     ->directory('dokumentasi/file')
                     ->visibility('public')
                     ->disk(config('filesystems.default'))
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'video/mp4'])
+                    ->maxSize(20480)
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->label('File Dokumentasi')
-                    ->image()
-                    ->imagePreviewHeight('250')
-                    ->hint('Unggah file baru untuk menggantikan file yang sudah ada.'),
+                    ->hint('Unggah file baru untuk menggantikan file yang sudah ada.')
+                    ->validationMessages([
+                        'mimetypes' => 'File dokumentasi harus berformat JPG, PNG, atau MP4.',
+                        'max' => 'Ukuran file dokumentasi maksimal 20 MB.',
+                        'required' => 'File dokumentasi wajib diunggah.',
+                    ]),
                 Forms\Components\Textarea::make('deskripsi')
                     ->columnSpanFull()
                     ->required()

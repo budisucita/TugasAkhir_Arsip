@@ -13,6 +13,14 @@ class CreateTemplateSurat extends CreateRecord
 {
     protected static string $resource = TemplateSuratResource::class;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Catat identitas pengguna yang bertanggung jawab atas template surat.
+        $data['user_id'] = auth()->id();
+
+        return $data;
+    }
+
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
         try {

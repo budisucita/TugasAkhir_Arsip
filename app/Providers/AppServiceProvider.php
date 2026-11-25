@@ -15,6 +15,12 @@ use App\Observers\DokumentasiObserver;
 use App\Models\Kegiatan;
 use App\Observers\KegiatanObserver;
 
+use App\Models\Anggota;
+use App\Observers\AnggotaObserver;
+
+use App\Models\Surat;
+use App\Observers\SuratObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -38,6 +44,10 @@ class AppServiceProvider extends ServiceProvider
         Keuangan::observe(KeuanganObserver::class);
         Dokumentasi::observe(DokumentasiObserver::class);
         Kegiatan::observe(KegiatanObserver::class);
+        // Observer ini menjaga sinkronisasi cache statistik Dashboard
+        // (StatsOverview) saat data Anggota/Surat berubah.
+        Anggota::observe(AnggotaObserver::class);
+        Surat::observe(SuratObserver::class);
 
         // Ambil & cache data settings HANYA saat view publik dirender.
         //

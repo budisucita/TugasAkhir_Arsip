@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use App\Support\SecureFile;
 
 class Kegiatan extends Model
 {
@@ -17,7 +19,6 @@ class Kegiatan extends Model
         'user_id',
         'nama_kegiatan',
         'lokasi',
-        'views',
         'status',
         'tanggal_mulai',
         'tanggal_selesai',
@@ -33,6 +34,38 @@ class Kegiatan extends Model
             'tanggal_mulai' => 'date',
             'tanggal_selesai' => 'date',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($kegiatan) {
+            // Hapus seluruh berkas kegiatan dari disk privat saat record dihapus.
+            foreach (['proposal_file', 'rab_file', 'lpj_file'] as $field) {
+                if ($kegiatan->{$field} && Storage::disk(SecureFile::diskName())->exists($kegiatan->{$field})) {
+                    Storage::disk(SecureFile::diskName())->delete($kegiatan->{$field});
+                }
+            }
+        });
+    }
+
+    /**
+     * URL terproteksi untuk berkas kegiatan (diakses lewat controller).
+     */
+    public function getProposalUrlAttribute(): ?string
+    {
+        return SecureFile::urlFor($this, 'proposal_file');
+    }
+
+    public function getRabUrlAttribute(): ?string
+    {
+        return SecureFile::urlFor($this, 'rab_file');
+    }
+
+    public function getLpjUrlAttribute(): ?string
+    {
+        return SecureFile::urlFor($this, 'lpj_file');
     }
 
     public function user(): BelongsTo

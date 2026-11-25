@@ -9,6 +9,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use App\Support\SecureFile;
 
 class KeuanganRelationManager extends RelationManager
 {
@@ -51,7 +52,9 @@ class KeuanganRelationManager extends RelationManager
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('bukti_file')
                     ->directory('keuangan/bukti')
-                    ->visibility('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                     ->maxSize(10240)
                     ->validationMessages([

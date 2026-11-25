@@ -89,6 +89,13 @@ class LogResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('model')
+                    ->label('Objek')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => $state ? class_basename($state) : '—')
+                    ->sortable()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('description')
                     ->label('Deskripsi')
                     ->limit(50) // Batasi panjang teks di tabel
@@ -186,10 +193,17 @@ class LogResource extends Resource
                                     default => ucfirst($state),
                                 }),
 
-                            // Ganti 'subject...' menjadi relasi 'keuangan'
-                            TextEntry::make('keuangan.keterangan')
-                                ->label('Keterangan Data')
-                                ->placeholder('Data Keuangan Terhapus'),
+                            // Objek/model log ditampilkan eksplisit (Keuangan/Kegiatan)
+                            // agar tidak salah label untuk log kegiatan operasional.
+                            TextEntry::make('model')
+                                ->label('Objek')
+                                ->badge()
+                                ->formatStateUsing(fn (?string $state): string => $state ? class_basename($state) : '—'),
+
+                            TextEntry::make('description')
+                                ->label('Deskripsi')
+                                ->placeholder('—')
+                                ->columnSpanFull(),
 
                             TextEntry::make('created_at')
                                 ->label('Waktu')

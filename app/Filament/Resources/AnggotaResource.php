@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnggotaResource\Pages;
 use App\Models\Anggota;
+use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -46,7 +47,9 @@ class AnggotaResource extends Resource
                 Forms\Components\FileUpload::make('foto')
                     ->image()
                     ->directory('anggota/foto')
-                    ->visibility('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->maxSize(5120)
                     ->validationMessages([
                         'image' => 'File Foto harus berupa gambar.',
@@ -63,6 +66,7 @@ class AnggotaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('foto')
+                    ->getStateUsing(fn (Anggota $record): ?string => SecureFile::urlFor($record, 'foto'))
                     ->circular(),
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable(),

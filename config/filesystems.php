@@ -17,6 +17,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Private Filesystem Disk
+    |--------------------------------------------------------------------------
+    |
+    | Disk yang dipakai untuk menyimpan berkas sensitif (bukti transaksi, surat
+    | resmi, proposal, RAB, LPJ, dan foto anggota). Berkas di disk ini TIDAK
+    | pernah disajikan langsung via /storage dan hanya bisa diakses melalui
+    | controller terproteksi (SecureFileController). Di produksi, arahkan ke
+    | disk S3 yang dikonfigurasi privat (mis. FILESYSTEM_PRIVATE_DISK=s3).
+    |
+    */
+
+    'private_disk' => env('FILESYSTEM_PRIVATE_DISK', 'private'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -41,6 +56,13 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',
             'throw' => false,
         ],
 

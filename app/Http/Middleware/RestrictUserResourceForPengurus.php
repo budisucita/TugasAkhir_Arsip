@@ -12,16 +12,10 @@ class RestrictUserResourceForPengurus
     {
         $user = $request->user();
 
-        if ($user && $user->role === 'pengurus') {
-            $path = $request->path();
-
-            if (str_starts_with($path, 'admin/users')) {
-                if ($request->isMethod('get') && $path === 'admin/users') {
-                    return $next($request);
-                }
-
-                abort(403);
-            }
+        // Blokir seluruh rute dengan prefix "admin/users" untuk peran pengurus,
+        // termasuk halaman daftar, agar tidak ada kebocoran data (mis. email).
+        if ($user && $user->role === 'pengurus' && str_starts_with($request->path(), 'admin/users')) {
+            abort(403);
         }
 
         return $next($request);

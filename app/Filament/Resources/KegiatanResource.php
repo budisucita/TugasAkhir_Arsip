@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\KegiatanResource\Pages;
 use App\Filament\Resources\KegiatanResource\RelationManagers;
 use App\Models\Kegiatan;
+use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -56,8 +57,9 @@ class KegiatanResource extends Resource
                     ->required(),
                 Forms\Components\FileUpload::make('proposal_file')
                     ->directory('kegiatan/proposal')
-                    ->visibility('public')
-                    ->disk('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(10240)
                     ->validationMessages([
@@ -67,8 +69,9 @@ class KegiatanResource extends Resource
                     ->label('File Proposal'),
                 Forms\Components\FileUpload::make('rab_file')
                     ->directory('kegiatan/rab')
-                    ->visibility('public')
-                    ->disk('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(10240)
                     ->validationMessages([
@@ -78,8 +81,9 @@ class KegiatanResource extends Resource
                     ->label('File RAB'),
                 Forms\Components\FileUpload::make('lpj_file')
                     ->directory('kegiatan/lpj')
-                    ->visibility('public')
-                    ->disk('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(10240)
                     ->validationMessages([

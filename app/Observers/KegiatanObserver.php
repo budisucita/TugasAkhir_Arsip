@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Filament\Widgets\StatsOverview;
 use App\Models\Kegiatan;
 use App\Models\Log;
 use Illuminate\Support\Facades\Cache;
@@ -111,11 +112,13 @@ class KegiatanObserver
     }
 
     /**
-     * Bersihkan cache landing page yang terpengaruh perubahan kegiatan.
+     * Bersihkan cache landing page dan statistik Dashboard yang terpengaruh
+     * perubahan kegiatan (mis. jumlah "Kegiatan Aktif").
      */
     private function clearCache(): void
     {
         Cache::forget('kegiatan_terbaru_landing');
         Cache::forget('statistik_landing');
+        Cache::forget(StatsOverview::CACHE_KEY);
     }
 }

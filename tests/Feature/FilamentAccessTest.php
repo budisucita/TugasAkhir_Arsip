@@ -114,7 +114,8 @@ class FilamentAccessTest extends TestCase
         $pengurus = $this->pengurus();
         $target = User::factory()->create(['role' => 'pengurus']);
 
-        $this->actingAs($pengurus)->get('/admin/users')->assertSuccessful();
+        // Seluruh rute prefix admin/users ditolak untuk pengurus.
+        $this->actingAs($pengurus)->get('/admin/users')->assertForbidden();
         $this->actingAs($pengurus)->get('/admin/users/create')->assertForbidden();
         $this->actingAs($pengurus)->get('/admin/users/' . $target->getKey() . '/edit')->assertForbidden();
     }

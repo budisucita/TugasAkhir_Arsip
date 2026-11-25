@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SuratResource\Pages;
 use App\Models\Surat;
+use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -37,6 +38,7 @@ class SuratResource extends Resource
                 Forms\Components\TextInput::make('no_surat')
                     ->required()
                     ->maxLength(100)
+                    ->unique(ignoreRecord: true)
                     ->placeholder('Nomor Surat'),
                 Forms\Components\TextInput::make('pengirim')
                     ->required()
@@ -51,7 +53,9 @@ class SuratResource extends Resource
                 Forms\Components\FileUpload::make('file_surat')
                     ->required()
                     ->directory('surat/file')
-                    ->visibility('public')
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(10240)
                     ->validationMessages([

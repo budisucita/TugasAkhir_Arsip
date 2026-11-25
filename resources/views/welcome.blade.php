@@ -262,6 +262,8 @@
                     height="100%"
                     loading="lazy"
                     allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
                     title="Peta lokasi Banjar Karya Dharma Sesetan"
                     src="{{ ($settings ?? collect())->get('lokasi_map') }}">
                 </iframe>
@@ -275,7 +277,18 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        new Swiper('.mySwiper', {
+        const swiperEl = document.querySelector('.mySwiper');
+        if (!swiperEl) {
+            return;
+        }
+
+        // Hitung jumlah slide yang benar-benar dirender. Ketika tidak ada foto
+        // dokumentasi, hanya satu slide fallback yang tampil sehingga mode loop
+        // harus dinonaktifkan agar Swiper tidak memunculkan peringatan
+        // "not enough slides for loop mode" pada console browser.
+        const slideCount = swiperEl.querySelectorAll('.swiper-slide').length;
+
+        new Swiper(swiperEl, {
             effect: 'coverflow',
             grabCursor: true,
             centeredSlides: true,
@@ -297,8 +310,10 @@
                 el: '.swiper-pagination',
                 clickable: true,
             },
-            loop: true,
-            loopedSlides: 6,
+            // Loop hanya aktif bila jumlah slide mencukupi, dan loopedSlides
+            // disesuaikan agar tidak pernah melebihi slide yang tersedia.
+            loop: slideCount > 1,
+            loopedSlides: Math.min(6, slideCount),
             observer: true,
             observeParents: true,
         });

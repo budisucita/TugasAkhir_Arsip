@@ -18,7 +18,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pengurus']);
+        return $user->role === 'admin';
     }
 
     /**
@@ -29,7 +29,7 @@ class UserPolicy
      */
     public function view(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pengurus']);
+        return $user->role === 'admin';
     }
 
     /**

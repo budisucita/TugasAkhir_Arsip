@@ -88,7 +88,7 @@ class SyncStorage extends Command
             return self::SUCCESS;
         }
 
-        return $this->execute($operations, $from, $to, $source, $target);
+        return $this->applyOperations($operations, $source, $target);
     }
 
     /**

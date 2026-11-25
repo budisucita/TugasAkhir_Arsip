@@ -6,6 +6,14 @@ use App\Models\User;
 use App\Models\Log;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Kebijakan audit trail: catatan log bersifat permanen (append-only).
+ *
+ * Hanya operasi baca (viewAny/view) yang diizinkan. Seluruh operasi yang dapat
+ * membuat, mengubah, menggandakan, atau menghapus entri log diblokir untuk
+ * semua peran (termasuk admin) demi menjaga integritas dan keandalan jejak
+ * audit sistem.
+ */
 class LogPolicy
 {
     use HandlesAuthorization;
@@ -28,10 +36,11 @@ class LogPolicy
 
     /**
      * Determine whether the user can create models.
+     * Entri log hanya dibuat otomatis oleh sistem (Observer), bukan manual.
      */
     public function create(User $user): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -39,7 +48,7 @@ class LogPolicy
      */
     public function update(User $user, Log $log): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -47,7 +56,7 @@ class LogPolicy
      */
     public function delete(User $user, Log $log): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -55,7 +64,7 @@ class LogPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -63,7 +72,7 @@ class LogPolicy
      */
     public function forceDelete(User $user, Log $log): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -71,7 +80,7 @@ class LogPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -79,7 +88,7 @@ class LogPolicy
      */
     public function restore(User $user, Log $log): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -87,7 +96,7 @@ class LogPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -95,7 +104,7 @@ class LogPolicy
      */
     public function replicate(User $user, Log $log): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -103,6 +112,6 @@ class LogPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->role === 'admin';
+        return false;
     }
 }

@@ -22,7 +22,14 @@
                 <!-- Main Image -->
                 <div class="rounded-2xl overflow-hidden relative group shadow-2xl border border-white/10" data-aos="fade-up">
                     @if($kegiatan->dokumentasi->isNotEmpty())
-                        <img src="{{ $kegiatan->dokumentasi->first()->file_url }}" alt="{{ $kegiatan->nama_kegiatan }}" class="w-full h-full object-cover aspect-video rounded-lg">
+                        @php $mediaUtama = $kegiatan->dokumentasi->first(); @endphp
+                        @if($mediaUtama->tipe === 'video')
+                            <video src="{{ $mediaUtama->file_url }}" controls playsinline preload="metadata" class="w-full h-full object-cover aspect-video rounded-lg bg-black">
+                                Browser Anda tidak mendukung pemutaran video.
+                            </video>
+                        @else
+                            <img src="{{ $mediaUtama->file_url }}" alt="{{ $kegiatan->nama_kegiatan }}" class="w-full h-full object-cover aspect-video rounded-lg">
+                        @endif
                     @else
                         <div class="w-full h-full aspect-video bg-slate-800 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,23 +87,33 @@
                         @foreach($kegiatan->dokumentasi as $doc)
                             <div class="relative group rounded-2xl overflow-hidden glass-card hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300" data-aos="fade-up">
                                 <div class="w-full aspect-video relative overflow-hidden rounded-2xl">
-                                    <img src="{{ $doc->file_url }}" 
-                                         alt="Dokumentasi" 
-                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                                        <div class="transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">
-                                            <p class="text-white font-medium text-sm line-clamp-2 mb-1">Dokumentasi</p>
-                                            <p class="text-gray-400 text-xs">{{ $kegiatan->created_at->format('d M Y') }}</p>
+                                    @if($doc->tipe === 'video')
+                                        <video src="{{ $doc->file_url }}"
+                                               controls
+                                               playsinline
+                                               preload="metadata"
+                                               class="w-full h-full object-cover bg-black">
+                                            Browser Anda tidak mendukung pemutaran video.
+                                        </video>
+                                    @else
+                                        <img src="{{ $doc->file_url }}" 
+                                             alt="Dokumentasi" 
+                                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                            <div class="transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">
+                                                <p class="text-white font-medium text-sm line-clamp-2 mb-1">Dokumentasi</p>
+                                                <p class="text-gray-400 text-xs">{{ $kegiatan->created_at->format('d M Y') }}</p>
+                                            </div>
+                                            <a href="{{ $doc->file_url }}" 
+                                               target="_blank"
+                                               class="absolute bottom-6 right-6 px-4 py-2 min-h-[44px] rounded-xl bg-white text-black hover:bg-amber-400 transition-colors shadow-lg transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 delay-75"
+                                               title="Lihat Foto">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/>
+                                                </svg>
+                                            </a>
                                         </div>
-                                        <a href="{{ $doc->file_url }}" 
-                                           target="_blank"
-                                           class="absolute bottom-6 right-6 px-4 py-2 min-h-[44px] rounded-xl bg-white text-black hover:bg-amber-400 transition-colors shadow-lg transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 delay-75"
-                                           title="Lihat Foto">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/>
-                                            </svg>
-                                        </a>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -126,7 +143,12 @@
                         <div class="flex gap-4">
                             <div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                                 @if($related->dokumentasi->isNotEmpty())
-                                    <img src="{{ $related->dokumentasi->first()->file_url }}" alt="{{ $related->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    @php $relMedia = $related->dokumentasi->first(); @endphp
+                                    @if($relMedia->tipe === 'video')
+                                        <video src="{{ $relMedia->file_url }}" muted playsinline preload="metadata" class="w-full h-full object-cover bg-black"></video>
+                                    @else
+                                        <img src="{{ $relMedia->file_url }}" alt="{{ $related->nama_kegiatan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    @endif
                                 @else
                                     <div class="w-full h-full bg-slate-800 flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,7 +182,7 @@
 <script>
     function shareTo(platform) {
         const url = encodeURIComponent(window.location.href);
-        const text = encodeURIComponent("{{ $kegiatan->nama_kegiatan }}");
+        const text = encodeURIComponent(@js($kegiatan->nama_kegiatan));
         
         let shareUrl = '';
         

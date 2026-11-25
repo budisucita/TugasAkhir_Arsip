@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Keuangan;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\SecureFileController;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('welcome');
 Route::get('/galeri', [LandingPageController::class, 'galeri'])->name('galeri.index');
@@ -15,6 +17,14 @@ Route::get('/syarat-ketentuan', [LandingPageController::class, 'terms'])->name('
 Route::get('/kontak', [LandingPageController::class, 'contact'])->name('contact');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/laporan/keuangan/print', [LaporanKeuanganController::class, 'print'])->name('laporan.keuangan.print');
+    // Cetak laporan keuangan: auth + Policy (hanya admin/pengurus yang berizin).
+    Route::get('/laporan/keuangan/print', [LaporanKeuanganController::class, 'print'])
+        ->can('viewAny', Keuangan::class)
+        ->name('laporan.keuangan.print');
+
+    // Penyajian berkas sensitif dari disk privat (auth + Policy).
+    Route::get('/secure-file/{type}/{id}/{field}', [SecureFileController::class, 'show'])
+        ->whereNumber('id')
+        ->name('secure-file.show');
 });
 

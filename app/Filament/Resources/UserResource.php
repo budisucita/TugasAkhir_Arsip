@@ -145,13 +145,16 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        if (Auth::check()) {
-            if (Auth::user()->role === 'admin') {
-                $query->where('role', 'pengurus');
-            } else {
-                $query->where('role', '!=', 'admin');
-            }
+
+        // Admin mengelola seluruh akun pengguna. Query dasar TIDAK boleh mengunci
+        // salah satu peran, karena filter peran pada tabel (Admin/Pengurus) yang
+        // bertugas mempersempit hasil. Sebelumnya query dasar dibatasi ke
+        // 'pengurus' sehingga filter 'Admin' tidak pernah mengembalikan baris.
+        // Peran selain admin (bila diberi akses) tidak boleh melihat akun admin.
+        if (Auth::check() && Auth::user()->role !== 'admin') {
+            $query->where('role', '!=', 'admin');
         }
+
         return $query;
     }
 

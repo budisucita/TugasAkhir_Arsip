@@ -47,8 +47,9 @@ class StatsOverview extends BaseWidget
             $pengeluaran = (int) ($agregat->pengeluaran ?? 0);
             $saldo = $pemasukan - $pengeluaran;
 
-            // Hitung kegiatan yang akan datang (status != Selesai)
-            $kegiatanCount = Kegiatan::where('status', '!=', 'Selesai')->count();
+            // Hitung kegiatan aktif: hanya status 'Direncanakan' dan 'Berlangsung'.
+            // Status 'Dibatalkan' dan 'Selesai' tidak dihitung sebagai kegiatan aktif.
+            $kegiatanCount = Kegiatan::whereIn('status', ['Direncanakan', 'Berlangsung'])->count();
 
             // Hitung total surat
             $suratCount = Surat::count();

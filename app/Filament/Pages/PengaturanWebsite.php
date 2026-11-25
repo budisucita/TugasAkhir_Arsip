@@ -54,7 +54,13 @@ class PengaturanWebsite extends Page
                     // ->required(),
                 TextInput::make('lokasi_map')
                         ->label('Embed URL Google Maps')
-                        ->helperText('Buka Google Maps, cari lokasi, klik "Share", pilih "Embed a map", lalu salin URL dari dalam atribut src="...".'),
+                        ->helperText('Buka Google Maps, cari lokasi, klik "Share", pilih "Embed a map", lalu salin URL dari dalam atribut src="...".')
+                        ->nullable()
+                        ->rules(['url', 'regex:/^https:\/\/(www\.|maps\.)?google\.com\/maps[\/?].+/'])
+                        ->validationMessages([
+                            'url' => 'Format URL tidak valid. Sertakan skema https:// lengkap.',
+                            'regex' => 'Hanya URL embed Google Maps resmi (https://google.com/maps/... atau https://maps.google.com/maps?... ) yang diizinkan.',
+                        ]),
             ])
             ->statePath('data');
     }
@@ -72,8 +78,14 @@ class PengaturanWebsite extends Page
     {
         $data = $this->form->getState();
 
+        // Catat identitas pengguna yang terakhir mengubah pengaturan website.
+        $userId = Auth::id();
+
         foreach ($data as $key => $value) {
-            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value, 'user_id' => $userId],
+            );
         }
 
         // Hapus cache agar halaman depan menampilkan data terbaru

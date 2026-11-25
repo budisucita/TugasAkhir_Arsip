@@ -15,6 +15,18 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Kata sandi default 'password' hanya untuk pengembangan dan pengujian.
+        // Di produksi seeding akun demo ini dilarang agar tidak meninggalkan
+        // akun dengan kredensial yang mudah ditebak.
+        if (! app()->environment(['local', 'testing'])) {
+            $this->command?->warn(
+                'UserSeeder dilewati: akun demo dengan kata sandi default '
+                .'tidak boleh dibuat di lingkungan '.app()->environment().'.'
+            );
+
+            return;
+        }
+
         $admin = User::firstOrCreate(
             ['email' => 'admin@dharmabhakti.com'],
             [

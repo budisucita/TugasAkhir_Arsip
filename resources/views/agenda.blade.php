@@ -254,7 +254,7 @@
                             </a>
                             
                             <!-- Share Button -->
-                            <button onclick="shareItem('{{ $item->nama_kegiatan }}', '{{ route('agenda.show', $item->id) }}')" aria-label="Bagikan kegiatan ini" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white" title="Bagikan">
+                            <button type="button" data-title="{{ $item->nama_kegiatan }}" data-url="{{ route('agenda.show', $item->id) }}" onclick="shareItem(this)" aria-label="Bagikan kegiatan ini" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white" title="Bagikan">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                 </svg>
@@ -305,6 +305,10 @@
                             <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 animate-pulse">
                                 Berlangsung
                             </span>
+                        @elseif($item->status == 'Dibatalkan')
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                                Dibatalkan
+                            </span>
                         @else
                             <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                                 Akan Datang
@@ -338,12 +342,22 @@
 
 @push('scripts')
 <script>
-    function shareItem(title, url) {
+    function shareItem(el) {
+        const title = el.dataset.title;
+        const url = el.dataset.url;
+
         if (navigator.share) {
             navigator.share({
                 title: title,
                 url: url
-            }).catch(console.error);
+            }).catch((err) => {
+                // Pengguna membatalkan dialog berbagi: bukan kegagalan nyata,
+                // cukup diabaikan agar tidak mencetak error di konsol.
+                if (err.name === 'AbortError') {
+                    return;
+                }
+                console.error(err);
+            });
         } else {
             // Fallback for desktop or unsupported browsers
             const shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
