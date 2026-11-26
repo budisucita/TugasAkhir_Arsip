@@ -7,6 +7,8 @@ use App\Models\Surat;
 use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,7 +28,27 @@ class SuratResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Surat'; 
 
-    
+    /**
+     * Bulan dalam angka Romawi untuk kode bulan pada nomor surat.
+     *
+     * @var array<int, string>
+     */
+    private const BULAN_ROMAWI = [
+        1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+        7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII',
+    ];
+
+    /**
+     * Kode jenis surat berdasarkan statusnya.
+     *
+     * @var array<string, string>
+     */
+    private const KODE_JENIS_SURAT = [
+        'masuk' => 'SM',
+        'keluar' => 'ST-DB',
+    ];
+
+
 
     public static function form(Form $form): Form
     {
@@ -39,7 +61,16 @@ class SuratResource extends Resource
                     ->required()
                     ->maxLength(100)
                     ->unique(ignoreRecord: true)
-                    ->placeholder('Nomor Surat'),
+                    ->placeholder('Nomor Surat')
+                    ->helperText('Gunakan tombol "Generate" untuk membuat nomor surat otomatis berformat [urut]/[jenis]/[bulan]/[tahun].')
+                    ->suffixAction(
+                        Forms\Components\Actions\Action::make('generate_nomor')
+                            ->label('Generate')
+                            ->icon('heroicon-m-sparkles')
+                            ->action(function (Get $get, Set $set): void {
+                                $set('no_surat', static::generateNomorSurat($get('status')));
+                            })
+                    ),
                 Forms\Components\TextInput::make('pengirim')
                     ->required()
                     ->maxLength(100)
@@ -186,5 +217,45 @@ class SuratResource extends Resource
             'create' => Pages\CreateSurat::route('/create'),
             'edit' => Pages\EditSurat::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Hasilkan nomor surat otomatis berformat:
+     * [nomor_urut]/[kode_jenis_surat]/[kode_bulan]/[tahun]
+     * (contoh: 001/ST-DB/XI/2026).
+     *
+     * Nomor urut dihitung dari nomor surat tertinggi pada bulan & tahun
+     * berjalan sehingga tidak terjadi duplikasi, meski beberapa draft dibuat
+     * secara berurutan.
+     */
+    public static function generateNomorSurat(?string $status): string
+    {
+        $now = now();
+        $tahun = (int) $now->year;
+        $kodeBulan = self::BULAN_ROMAWI[(int) $now->month] ?? 'I';
+        $kodeJenis = self::KODE_JENIS_SURAT[$status] ?? 'ST-DB';
+
+        // Cari nomor urut tertinggi untuk bulan & tahun berjalan.
+        $max = 0;
+
+        Surat::query()
+            ->where('no_surat', 'like', '%/' . $kodeBulan . '/' . $tahun)
+            ->pluck('no_surat')
+            ->each(function ($nomor) use (&$max): void {
+                if (preg_match('#^(\d+)/#', (string) $nomor, $matches)) {
+                    $max = max($max, (int) $matches[1]);
+                }
+            });
+
+        // Naikkan urutan sampai menemukan nomor yang benar-benar belum dipakai.
+        $urut = $max + 1;
+
+        do {
+            $kandidat = str_pad((string) $urut, 3, '0', STR_PAD_LEFT)
+                . '/' . $kodeJenis . '/' . $kodeBulan . '/' . $tahun;
+            $urut++;
+        } while (Surat::where('no_surat', $kandidat)->exists());
+
+        return $kandidat;
     }
 }

@@ -53,6 +53,14 @@ class Dokumentasi extends Model
             return null;
         }
 
-        return Storage::disk(config('filesystems.default'))->url($this->file_path);
+        if (str_starts_with($this->file_path, 'http')) {
+            return $this->file_path;
+        }
+
+        if (config('filesystems.default') === 's3') {
+            return Storage::disk('s3')->url($this->file_path);
+        }
+
+        return '/storage/' . ltrim($this->file_path, '/');
     }
 }

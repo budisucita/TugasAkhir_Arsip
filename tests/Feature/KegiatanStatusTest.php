@@ -14,7 +14,7 @@ use Tests\TestCase;
  * Skenario yang diverifikasi:
  * - Kegiatan "Dibatalkan" TIDAK dihitung sebagai "Kegiatan Aktif" di Dashboard.
  * - "Kegiatan Aktif" hanya menjumlahkan status "Direncanakan" dan "Berlangsung".
- * - Kegiatan "Dibatalkan" tampil dengan badge status "Dibatalkan" (bukan "Akan Datang").
+ * - Kegiatan "Dibatalkan" tidak ditampilkan pada daftar agenda publik.
  * - Kegiatan "Direncanakan" dan "Berlangsung" tetap tampil dan dihitung dengan benar.
  */
 class KegiatanStatusTest extends TestCase
@@ -62,7 +62,7 @@ class KegiatanStatusTest extends TestCase
         $this->assertSame(0, $this->kegiatanAktifCount());
     }
 
-    public function test_kegiatan_dibatalkan_ditampilkan_dengan_badge_status_pada_kalender(): void
+    public function test_kegiatan_dibatalkan_tidak_tampil_di_daftar_agenda_publik(): void
     {
         Kegiatan::factory()->create([
             'nama_kegiatan' => 'Kegiatan Dibatalkan Uji',
@@ -71,9 +71,20 @@ class KegiatanStatusTest extends TestCase
 
         $html = $this->get('/agenda')->assertOk()->getContent();
 
-        // Badge merah "Dibatalkan" muncul pada tampilan Grid DAN Kalender (2 kali).
-        $this->assertStringContainsString('bg-red-500/20 text-red-400 border border-red-500/30', $html);
-        $this->assertGreaterThanOrEqual(2, substr_count($html, 'Dibatalkan'));
+        // Kegiatan Dibatalkan bersifat internal: tidak muncul di grid maupun kalender.
+        $this->assertStringNotContainsString('Kegiatan Dibatalkan Uji', $html);
+        $this->assertSame(0, substr_count($html, 'Dibatalkan'));
+    }
+
+    public function test_detail_kegiatan_dibatalkan_tidak_dapat_diakses_publik(): void
+    {
+        $dibatalkan = Kegiatan::factory()->create([
+            'nama_kegiatan' => 'Kegiatan Dibatalkan Detail',
+            'status' => 'Dibatalkan',
+        ]);
+
+        // Detail kegiatan berstatus Dibatalkan mengembalikan 404 bagi publik.
+        $this->get(route('agenda.show', $dibatalkan->id))->assertNotFound();
     }
 
     public function test_kegiatan_direncanakan_dan_berlangsung_tetap_tampil_dengan_status_benar(): void

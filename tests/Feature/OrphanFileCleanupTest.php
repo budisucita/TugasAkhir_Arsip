@@ -103,8 +103,9 @@ class OrphanFileCleanupTest extends TestCase
 
     public function test_menghapus_template_surat_menghapus_file_template(): void
     {
+        // Template surat bersifat internal: tersimpan di disk privat.
         $path = 'template-surat/template.docx';
-        Storage::disk('public')->put($path, 'template-bytes');
+        Storage::disk(SecureFile::diskName())->put($path, 'template-bytes');
 
         $template = TemplateSurat::create([
             'nama_dokumen' => 'Template Uji',
@@ -113,7 +114,7 @@ class OrphanFileCleanupTest extends TestCase
 
         $template->delete();
 
-        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertFalse(Storage::disk(SecureFile::diskName())->exists($path));
     }
 
     public function test_penghapusan_tetap_aman_saat_berkas_tidak_ditemukan(): void

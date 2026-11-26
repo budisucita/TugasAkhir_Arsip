@@ -57,12 +57,26 @@ class UserPolicy
     /**
      * Determine whether the user can delete the model.
      *
-     * @param  \App\Models\User  $user
+     * Admin boleh menghapus akun pengurus, namun DILARANG menghapus akun
+     * berperan admin (baik akun miliknya sendiri agar tidak terkunci dari
+     * sistem, maupun akun admin lain).
+     *
+     * @param  \App\Models\User  $user   Pelaku (yang sedang login)
+     * @param  \App\Models\User  $model  Akun yang akan dihapus
      * @return bool
      */
-    public function delete(User $user): bool
+    public function delete(User $user, User $model): bool
     {
-        return $user->role === 'admin';
+        if ($user->role !== 'admin') {
+            return false;
+        }
+
+        // Akun berperan admin dilindungi mutlak dari penghapusan.
+        if ($model->role === 'admin') {
+            return false;
+        }
+
+        return true;
     }
 
     /**

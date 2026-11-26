@@ -6,11 +6,13 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -121,7 +123,41 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->action(function (Collection $records): void {
+                            // Proteksi akun admin: Filament mengotorisasi hapus
+                            // massal hanya lewat ability "deleteAny", sehingga
+                            // Policy::delete (yang menolak penghapusan akun
+                            // admin) tidak dievaluasi per-record. Pisahkan akun
+                            // admin yang dilindungi dari akun yang boleh dihapus.
+                            [$adminRecords, $deletableRecords] = $records->partition(
+                                static fn (User $record): bool => $record->role === 'admin'
+                            );
+
+                            // Hanya akun non-admin yang benar-benar dihapus.
+                            $deletableRecords->each(
+                                static fn (User $record) => $record->delete()
+                            );
+
+                            if ($deletableRecords->isNotEmpty()) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Pengguna dihapus')
+                                    ->body($deletableRecords->count().' akun pengguna berhasil dihapus.')
+                                    ->send();
+                            }
+
+                            if ($adminRecords->isNotEmpty()) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Akun admin tidak dapat dihapus')
+                                    ->body(
+                                        'Akun berikut dibiarkan karena memiliki peran admin: '
+                                        .$adminRecords->pluck('name')->implode(', ').'.'
+                                    )
+                                    ->send();
+                            }
+                        }),
                 ]),
             ]);
     }

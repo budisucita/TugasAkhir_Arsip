@@ -6,6 +6,7 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Keuangan;
 use App\Models\Surat;
+use App\Models\TemplateSurat;
 use App\Models\User;
 use App\Support\SecureFile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -185,6 +186,78 @@ class SecureFileAccessTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_tamu_ditolak_mengakses_berkas_template_surat(): void
+    {
+        $template = $this->makeTemplateSurat();
+        $url = SecureFile::urlFor($template, 'file_path');
+
+        $this->assertStringContainsString('/secure-file/', (string) $url);
+
+        $this->get($url)->assertRedirect(route('filament.admin.auth.login'));
+    }
+
+    public function test_pengguna_tanpa_izin_ditolak_mengakses_berkas_template_surat(): void
+    {
+        $template = $this->makeTemplateSurat();
+        $url = SecureFile::urlFor($template, 'file_path');
+
+        // Peran di luar admin/pengurus ditolak Policy meskipun sudah login.
+        $this->actingAs(new User(['role' => 'tamu']));
+
+        $this->get($url)->assertForbidden();
+    }
+
+    public function test_admin_dapat_mengakses_berkas_template_surat(): void
+    {
+        $contents = '%PDF-1.4 template-rahasia';
+        $template = $this->makeTemplateSurat($contents);
+        $url = SecureFile::urlFor($template, 'file_path');
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+        $response = $this->get($url);
+
+        $response->assertOk();
+        $this->assertSame($contents, $response->streamedContent());
+    }
+
+    public function test_berkas_template_surat_tidak_terekspos_di_disk_publik(): void
+    {
+        $path = 'template-surat/internal.docx';
+
+        Storage::disk(SecureFile::diskName())->put($path, 'template-bytes');
+
+        // Tersedia di disk privat...
+        $this->assertTrue(Storage::disk(SecureFile::diskName())->exists($path));
+
+        // ...tetapi tidak ada di disk publik sehingga tidak bisa diakses via /storage/...
+        $this->assertFalse(Storage::disk(config('filesystems.default'))->exists($path));
+    }
+
+    public function test_halaman_template_surat_menampilkan_berkas_privat_tanpa_error(): void
+    {
+        $this->makeTemplateSurat();
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
+            ->get('/admin/template-surats')
+            ->assertSuccessful();
+    }
+
+    /**
+     * Buat record template surat beserta berkas di disk privat.
+     */
+    private function makeTemplateSurat(string $contents = '%PDF-1.4 template'): TemplateSurat
+    {
+        $path = 'template-surat/template-'.uniqid().'.pdf';
+
+        Storage::disk(SecureFile::diskName())->put($path, $contents);
+
+        return TemplateSurat::create([
+            'nama_dokumen' => 'Template Uji',
+            'file_path' => $path,
+        ]);
+    }
+
     /**
      * Buat record keuangan beserta berkas bukti di disk privat.
      */
@@ -216,11 +289,13 @@ class SecureFileAccessTest extends TestCase
         $suratPath = 'surat/file/s.pdf';
         $kegiatanPath = 'kegiatan/proposal/p.pdf';
         $anggotaPath = 'anggota/foto/a.jpg';
+        $templatePath = 'template-surat/t.docx';
 
         Storage::disk(SecureFile::diskName())->put($keuanganPath, '%PDF-1.4 keuangan');
         Storage::disk(SecureFile::diskName())->put($suratPath, '%PDF-1.4 surat');
         Storage::disk(SecureFile::diskName())->put($kegiatanPath, '%PDF-1.4 kegiatan');
         Storage::disk(SecureFile::diskName())->put($anggotaPath, 'anggota-image');
+        Storage::disk(SecureFile::diskName())->put($templatePath, '%PDF-1.4 template');
 
         $keuangan = Keuangan::create([
             'jenis_transaksi' => 'pemasukan',
@@ -250,11 +325,17 @@ class SecureFileAccessTest extends TestCase
             'foto' => $anggotaPath,
         ]);
 
+        $template = TemplateSurat::create([
+            'nama_dokumen' => 'Template Uji',
+            'file_path' => $templatePath,
+        ]);
+
         return [
             'keuangan' => ['record' => $keuangan, 'field' => 'bukti_file', 'contents' => '%PDF-1.4 keuangan'],
             'surat' => ['record' => $surat, 'field' => 'file_surat', 'contents' => '%PDF-1.4 surat'],
             'kegiatan' => ['record' => $kegiatan, 'field' => 'proposal_file', 'contents' => '%PDF-1.4 kegiatan'],
             'anggota' => ['record' => $anggota, 'field' => 'foto', 'contents' => 'anggota-image'],
+            'template_surat' => ['record' => $template, 'field' => 'file_path', 'contents' => '%PDF-1.4 template'],
         ];
     }
 }

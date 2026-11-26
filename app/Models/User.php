@@ -51,6 +51,19 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Pertahanan berlapis: akun berperan admin dilindungi mutlak dari
+        // penghapusan lewat jalur apa pun (hapus tunggal, hapus massal, maupun
+        // pemanggilan langsung). Filament memakai ability "deleteAny" untuk
+        // aksi hapus massal sehingga tidak memeriksa Policy::delete per-record;
+        // guard ini menutup celah penghapusan akun admin tersebut. Akun admin
+        // yang sedang login pun ikut terlindungi agar tidak terkunci keluar.
+        static::deleting(function (User $user): bool {
+            return $user->role !== 'admin';
+        });
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return in_array($this->role, ['admin', 'pengurus']);

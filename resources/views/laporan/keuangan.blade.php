@@ -211,10 +211,20 @@
         </thead>
         <tbody>
             @php
-                $saldo = 0;
+                // Saldo berjalan dimulai dari Saldo Awal (akumulasi transaksi
+                // sebelum tanggal_mulai), bukan selalu dari Rp 0.
+                $saldo = (int) ($saldoAwal ?? 0);
                 $totalPemasukan = 0;
                 $totalPengeluaran = 0;
             @endphp
+            @if (! empty($tampilkanSaldoAwal))
+                <tr>
+                    <td colspan="4" class="text-center" style="font-style: italic;">Saldo Awal Periode</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right" style="font-weight: bold;">{{ number_format($saldo, 0, ',', '.') }}</td>
+                </tr>
+            @endif
             @forelse($data as $index => $item)
                 @php
                     if ($item->jenis_transaksi == 'pemasukan') {
@@ -255,34 +265,61 @@
     </table>
 
     <div class="signature-block">
+        @php
+            // Nama penandatangan diambil otomatis dari pengaturan jabatan
+            // (tabel settings). Bila belum diisi, tetap tampilkan titik-titik.
+            $namaKetua = trim((string) ($settings['nama_ketua'] ?? ''));
+            $namaBendahara = trim((string) ($settings['nama_bendahara'] ?? ''));
+            $namaKepalaLingkungan = trim((string) ($settings['nama_kepala_lingkungan'] ?? ''));
+            $periodeJabatan = trim((string) ($settings['periode_jabatan'] ?? ''));
+        @endphp
         <div class="right-date">{{ $tempat ?? 'Denpasar' }}, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }}</div>
+        @if ($periodeJabatan !== '')
+            <div class="right-date" style="font-size: 11px;">Periode Jabatan: {{ $periodeJabatan }}</div>
+        @endif
         <div class="signature-grid">
             <div class="signature-item">
                 <div class="role">
                     <p>Hormat kami,</p>
                     <p>Ketua Panitia,</p>
                 </div>
-                <div class="dots">..................................</div>
+                @if ($namaKetua !== '')
+                    <p style="font-weight: bold; text-decoration: underline;">{{ $namaKetua }}</p>
+                @else
+                    <div class="dots">..................................</div>
+                @endif
             </div>
             <div class="signature-item">
                 <div class="role">
                     <p>&nbsp;</p>
                     <p>Bendahara,</p>
                 </div>
-                <div class="dots">..................................</div>
+                @if ($namaBendahara !== '')
+                    <p style="font-weight: bold; text-decoration: underline;">{{ $namaBendahara }}</p>
+                @else
+                    <div class="dots">..................................</div>
+                @endif
             </div>
             <div class="signature-item">
                 <div class="role">
                     <p>&nbsp;</p>
                     <p>Ketua STT Dharma Bhakti,</p>
                 </div>
-                <div class="dots">..................................</div>
+                @if ($namaKetua !== '')
+                    <p style="font-weight: bold; text-decoration: underline;">{{ $namaKetua }}</p>
+                @else
+                    <div class="dots">..................................</div>
+                @endif
             </div>
         </div>
         <div class="signature-center">
             <p>Mengetahui,</p>
             <p>Kepala Lingkungan Banjar Karya Dharma</p>
-            <div class="dots">..................................</div>
+            @if ($namaKepalaLingkungan !== '')
+                <p style="font-weight: bold; text-decoration: underline; margin-top: 60px;">{{ $namaKepalaLingkungan }}</p>
+            @else
+                <div class="dots">..................................</div>
+            @endif
         </div>
     </div>
 

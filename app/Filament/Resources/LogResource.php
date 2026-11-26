@@ -3,7 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LogResource\Pages;
+use App\Models\Anggota;
+use App\Models\Kegiatan;
+use App\Models\Keuangan;
 use App\Models\Log;
+use App\Models\Surat;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,6 +23,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Group;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Auth;
 
 
 class LogResource extends Resource
@@ -27,7 +32,7 @@ class LogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'Log Aktivitas Keuangan';
+    protected static ?string $navigationLabel = 'Log Aktivitas';
 
     protected static ?string $modelLabel = 'Log Aktivitas';
 
@@ -111,6 +116,16 @@ class LogResource extends Resource
             ])
             ->defaultSort('created_at', 'desc') // Urutkan dari yang terbaru
             ->filters([
+                // 0. Filter berdasarkan kategori modul (Keuangan, Kegiatan, dst).
+                SelectFilter::make('model')
+                    ->label('Modul')
+                    ->options([
+                        Keuangan::class => 'Keuangan',
+                        Kegiatan::class => 'Kegiatan',
+                        Surat::class => 'Surat',
+                        Anggota::class => 'Anggota',
+                    ]),
+
                 // 1. Filter berdasarkan Aksi (Action)
                 SelectFilter::make('action')
                     ->label('Jenis Aksi')
@@ -215,19 +230,20 @@ class LogResource extends Resource
                 Group::make([
                     Section::make('Perubahan Data')
                         ->schema([
-                            // Ganti 'properties.old' menjadi 'before'
+                            // Data mentah (raw JSON) kolom before/after hanya boleh
+                            // dibaca oleh admin. Peran pengurus hanya melihat
+                            // metadata log (pelaku, aksi, objek, waktu).
                             KeyValueEntry::make('before')
                                 ->label('Data Lama (Before)')
                                 ->keyLabel('Kolom')
                                 ->valueLabel('Nilai')
-                                ->hidden(fn ($state) => empty($state)), // Sembunyikan jika kosong
+                                ->visible(fn ($state): bool => Auth::user()?->role === 'admin' && ! empty($state)),
 
-                            // Ganti 'properties.attributes' menjadi 'after'
                             KeyValueEntry::make('after')
                                 ->label('Data Baru (After)')
                                 ->keyLabel('Kolom')
                                 ->valueLabel('Nilai')
-                                ->hidden(fn ($state) => empty($state)), // Sembunyikan jika kosong
+                                ->visible(fn ($state): bool => Auth::user()?->role === 'admin' && ! empty($state)),
                         ])
                 ])->columnSpan(['lg' => 2]),
 

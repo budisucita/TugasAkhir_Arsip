@@ -10,6 +10,7 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Surat;
 use App\Models\User;
+use App\Support\SecureFile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -120,7 +121,8 @@ class FrontendIssuesRemediationTest extends TestCase
 
     public function test_unggahan_template_dengan_nama_sama_tidak_saling_menimpa(): void
     {
-        Storage::fake(config('filesystems.default'));
+        // Template surat bersifat internal: berkas disimpan di disk privat.
+        Storage::fake(SecureFile::diskName());
 
         $admin = $this->admin();
         $this->actingAs($admin);
@@ -137,7 +139,7 @@ class FrontendIssuesRemediationTest extends TestCase
         }
 
         // Dua berkas tersimpan terpisah (nama unik) — tidak saling menimpa.
-        $files = Storage::disk(config('filesystems.default'))->files('template-surat');
+        $files = Storage::disk(SecureFile::diskName())->files('template-surat');
         $this->assertCount(2, $files);
     }
 

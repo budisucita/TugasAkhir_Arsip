@@ -16,7 +16,9 @@ class LandingPageController extends Controller
         $settings = $this->getSettings();
         
         $kegiatanTerbaru = Cache::remember('kegiatan_terbaru_landing', 3600, function () {
-            return Kegiatan::with(['user', 'dokumentasi' => function($q) {
+            // Tanpa relasi 'user': data akun penginput bersifat internal dan
+            // tidak boleh terekspos pada halaman publik.
+            return Kegiatan::with(['dokumentasi' => function($q) {
                 $q->where('tipe', 'foto')->latest();
             }])
                 ->where('status', 'Selesai')
@@ -80,7 +82,10 @@ class LandingPageController extends Controller
 
         $query = Kegiatan::with(['dokumentasi' => function($q) {
             $q->where('tipe', 'foto')->latest();
-        }]);
+        }])
+            // Kegiatan berstatus Dibatalkan bersifat internal dan tidak boleh
+            // tampil di daftar agenda publik mana pun.
+            ->where('status', '!=', 'Dibatalkan');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -122,6 +127,7 @@ class LandingPageController extends Controller
         $popularKegiatan = Kegiatan::with(['dokumentasi' => function($q) {
                 $q->where('tipe', 'foto')->latest();
             }])
+            ->where('status', '!=', 'Dibatalkan')
             ->orderBy('tanggal_mulai', 'desc')
             ->take(5)
             ->get();
@@ -138,7 +144,10 @@ class LandingPageController extends Controller
     {
         $settings = $this->getSettings();
 
-        $kegiatan = Kegiatan::with(['dokumentasi', 'user'])->findOrFail($id);
+        // Detail kegiatan berstatus Dibatalkan tidak boleh diakses publik: 404.
+        $kegiatan = Kegiatan::with('dokumentasi')
+            ->where('status', '!=', 'Dibatalkan')
+            ->findOrFail($id);
 
         $relatedKegiatan = Kegiatan::with(['dokumentasi' => function($q) {
                 $q->where('tipe', 'foto')->latest();

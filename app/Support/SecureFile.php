@@ -6,6 +6,7 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Keuangan;
 use App\Models\Surat;
+use App\Models\TemplateSurat;
 use Closure;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,7 @@ class SecureFile
         'surat' => ['model' => Surat::class, 'fields' => ['file_surat']],
         'kegiatan' => ['model' => Kegiatan::class, 'fields' => ['proposal_file', 'rab_file', 'lpj_file']],
         'anggota' => ['model' => Anggota::class, 'fields' => ['foto']],
+        'template_surat' => ['model' => TemplateSurat::class, 'fields' => ['file_path']],
     ];
 
     /**
@@ -48,6 +50,7 @@ class SecureFile
         'kegiatan/rab' => 'kegiatan',
         'kegiatan/lpj' => 'kegiatan',
         'anggota/foto' => 'anggota',
+        'template-surat' => 'template_surat',
     ];
 
     /**

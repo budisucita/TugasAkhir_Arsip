@@ -52,7 +52,9 @@ class FilesystemDiskConfigurationTest extends TestCase
 
         $dokumentasi = $this->makeDokumentasi($path);
 
-        $this->assertSame('http://localhost/storage/'.$path, $dokumentasi->file_url);
+        // URL disk publik kini relatif (tanpa prefiks APP_URL) agar aman saat
+        // diakses melalui proxy HTTPS (mis. Ngrok) tanpa memicu mixed content.
+        $this->assertSame('/storage/'.$path, $dokumentasi->file_url);
         $this->assertStringContainsString('/storage/', $dokumentasi->file_url);
         $this->assertStringNotContainsString('/secure-file/', $dokumentasi->file_url);
     }
@@ -117,7 +119,7 @@ class FilesystemDiskConfigurationTest extends TestCase
 
         $this->get('/galeri')
             ->assertOk()
-            ->assertSee('http://localhost/storage/'.$path, false);
+            ->assertSee('/storage/'.$path, false);
     }
 
     public function test_tidak_ada_hardcode_disk_publik_pada_resource_dan_komponen(): void

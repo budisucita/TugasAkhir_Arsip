@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TemplateSuratResource\Pages;
 use App\Models\TemplateSurat;
+use App\Support\SecureFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -11,7 +12,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class TemplateSuratResource extends Resource
 {
@@ -37,8 +37,9 @@ class TemplateSuratResource extends Resource
                 Forms\Components\FileUpload::make('file_path')
                     ->label('File Template')
                     ->directory('template-surat')
-                    ->visibility('public')
-                    ->disk(config('filesystems.default'))
+                    ->visibility('private')
+                    ->disk(SecureFile::diskName())
+                    ->getUploadedFileUsing(SecureFile::uploadedFileUsing())
                     // Tanpa preserveFilenames(): Filament menghasilkan nama berkas
                     // unik (ULID) sehingga unggahan dengan nama sama tidak menimpa
                     // berkas lama secara diam-diam di penyimpanan.
@@ -115,9 +116,10 @@ class TemplateSuratResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Action::make('download')
                     ->label('Download')
-                    ->url(fn ($record) => filled($record->file_path)
-                        ? Storage::disk(config('filesystems.default'))->url($record->file_path)
-                        : null)
+                    // Berkas template bersifat internal: diunduh lewat rute
+                    // terproteksi (SecureFileController) yang memverifikasi
+                    // autentikasi + Policy, bukan URL /storage publik.
+                    ->url(fn ($record) => SecureFile::urlFor($record, 'file_path'))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

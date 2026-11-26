@@ -22,9 +22,19 @@ Route::middleware('auth')->group(function () {
         ->can('viewAny', Keuangan::class)
         ->name('laporan.keuangan.print');
 
+    // Ekspor laporan keuangan (.xlsx): auth + Policy yang sama seperti cetak.
+    Route::get('/laporan/keuangan/export', [LaporanKeuanganController::class, 'exportExcel'])
+        ->can('viewAny', Keuangan::class)
+        ->name('laporan.keuangan.export');
+
     // Penyajian berkas sensitif dari disk privat (auth + Policy).
     Route::get('/secure-file/{type}/{id}/{field}', [SecureFileController::class, 'show'])
         ->whereNumber('id')
         ->name('secure-file.show');
+
+    // Proxy unduhan berkas privat oleh admin (auth + Policy).
+    Route::get('/admin/dokumen/{tipe}/{id}', [SecureFileController::class, 'download'])
+        ->whereNumber('id')
+        ->name('admin.dokumen.download');
 });
 

@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use Filament\Pages\Page;
 use App\Models\Setting;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -61,6 +62,33 @@ class PengaturanWebsite extends Page
                             'url' => 'Format URL tidak valid. Sertakan skema https:// lengkap.',
                             'regex' => 'Hanya URL embed Google Maps resmi (https://google.com/maps/... atau https://maps.google.com/maps?... ) yang diizinkan.',
                         ]),
+
+                Section::make('Struktur Jabatan & Penandatangan')
+                    ->description('Nama pejabat yang tercatat akan dicetak otomatis pada blok tanda tangan laporan keuangan sesuai jabatannya.')
+                    ->schema([
+                        TextInput::make('nama_ketua')
+                            ->label('Nama Ketua')
+                            ->maxLength(100)
+                            ->placeholder('Contoh: I Made Contoh'),
+                        TextInput::make('nama_sekretaris')
+                            ->label('Nama Sekretaris')
+                            ->maxLength(100)
+                            ->placeholder('Contoh: Ni Wayan Contoh'),
+                        TextInput::make('nama_bendahara')
+                            ->label('Nama Bendahara')
+                            ->maxLength(100)
+                            ->placeholder('Contoh: I Gede Contoh'),
+                        TextInput::make('nama_kepala_lingkungan')
+                            ->label('Nama Kepala Lingkungan')
+                            ->maxLength(100)
+                            ->placeholder('Contoh: I Nyoman Contoh'),
+                        TextInput::make('periode_jabatan')
+                            ->label('Periode Jabatan')
+                            ->maxLength(50)
+                            ->placeholder('Contoh: 2024 - 2027'),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
             ])
             ->statePath('data');
     }

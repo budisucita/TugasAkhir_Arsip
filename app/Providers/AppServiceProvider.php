@@ -21,6 +21,9 @@ use App\Observers\AnggotaObserver;
 use App\Models\Surat;
 use App\Observers\SuratObserver;
 
+use App\Models\User;
+use App\Observers\UserObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -37,6 +40,14 @@ class AppServiceProvider extends ServiceProvider
     
     public function boot(): void
     {
+        // Paksa penggunaan skema HTTPS saat aplikasi diakses melalui proxy
+        // (mis. Ngrok) yang meneruskan header X-Forwarded-Proto: https.
+        // Mencegah aset bergambar dimuat via HTTP (mixed content) sehingga
+        // tidak diblokir browser.
+        if (! app()->runningInConsole() && (request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Terapkan locale Bahasa Indonesia untuk format tanggal (Carbon/Filament)
         // agar nama bulan tampil dalam Bahasa Indonesia (mis. "Mei", "Agu", "Okt").
         \Illuminate\Support\Carbon::setLocale('id');
@@ -48,6 +59,8 @@ class AppServiceProvider extends ServiceProvider
         // (StatsOverview) saat data Anggota/Surat berubah.
         Anggota::observe(AnggotaObserver::class);
         Surat::observe(SuratObserver::class);
+        // Catat perubahan akun pengguna (khususnya perubahan peran) ke audit log.
+        User::observe(UserObserver::class);
 
         // Ambil & cache data settings HANYA saat view publik dirender.
         //
@@ -61,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
         // ubah menjadi collection, lalu simpan di cache selamanya. Cache di-invalidate
         // pada PengaturanWebsite::save() via Cache::forget('settings').
         View::composer(
-            ['layouts.public', 'welcome', 'agenda', 'agenda-show', 'galeri', 'pages.*'],
+            ['layouts.public', 'welcome', 'agenda', 'agenda-show', 'galeri', 'pages.*', 'laporan.keuangan'],
             function ($view) {
                 try {
                     $settings = Cache::rememberForever('settings', function () {
